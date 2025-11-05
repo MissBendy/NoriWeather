@@ -7,9 +7,7 @@ import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg
 
 PlasmoidItem {
-
     id: wrapper
-
     anchors.fill: parent
 
     Components.WeatherData {
@@ -18,10 +16,8 @@ PlasmoidItem {
 
     signal reset
 
-    //property bool dashWindowIsFocus: true
     property string currentTemp: weatherData.currentTemperature
     property string unitsTemperature: plasmoid.configuration.temperatureUnit
-    //property string textUnitsTemper: ? "C" : "F"
     property string location: weatherData.city
     property string weather: weatherData.weatherShottext
     property string currentIcon: weatherData.iconWeatherCurrent
@@ -32,7 +28,6 @@ PlasmoidItem {
     property alias forecastFullModel: forecastModel
     property bool isUpdate: false
     property date currentDateTime: new Date()
-
     readonly property int currentDayOfWeek: currentDateTime.getDay()
 
     ListModel {
@@ -43,140 +38,93 @@ PlasmoidItem {
     }
 
     function getTranslatedDayInitial(dayIndex) {
-        var tempDate = new Date(currentDateTime);
-        tempDate.setDate(tempDate.getDate() + dayIndex);
-        return tempDate.toLocaleString(Qt.locale(), "dddd");
+        var tempDate = new Date(currentDateTime)
+        tempDate.setDate(tempDate.getDate() + dayIndex)
+        return tempDate.toLocaleString(Qt.locale(), "dddd")
     }
 
+    // Returns an array of next 5 forecast hours
+    function getNextForecastHours() {
+        const now = new Date()
+        const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1
+        const hours = []
 
+        for (let i = 0; i < 5; i++) {
+            hours.push((nextHour + i) % 24)  // wrap around 24h
+        }
 
-    function hoursForModel(v) {
-        const now = new Date();
-        const hoursC = now.getHours(); // Horas (0-23)
-        const minutes = now.getMinutes(); // Minutos (0-59)
-        const currentTime =  minutes > 44 ? hoursC + 2 : hoursC + 1;
-
-        var hoursForecast = [currentTime, currentTime + 1, currentTime + 2, currentTime + 3, currentTime + 4]
-        return hoursForecast[v]
+        return hours
     }
 
     function hoursForecast() {
-
+        const forecastHoursArr = getNextForecastHours()
         hoursWeatherModel.clear()
-        for (var i = 0; i < 5; i++) {
+        for (let i = 0; i < 5; i++) {
             hoursWeatherModel.append({
                 icon: icons[i],
                 temp: temps[i],
-                hours: hoursForModel(i)
-            });
+                hours: forecastHoursArr[i]
+            })
         }
     }
+
     function hoursForecastUpdate() {
-        for (var o = 0; o < hoursWeatherModel.count; o++) {
-            hoursWeatherModel.set(o, { "icon": icons[o] });
-            hoursWeatherModel.set(o, { "temp": String(parseFloat(temps[o])) });
-            hoursWeatherModel.set(o, { "hours": hoursForModel(o) });
+        const forecastHoursArr = getNextForecastHours()
+        for (let i = 0; i < hoursWeatherModel.count; i++) {
+            hoursWeatherModel.set(i, { "icon": icons[i], "temp": String(parseFloat(temps[i])), "hours": forecastHoursArr[i] })
         }
     }
 
     function updateUnitsTempe() {
+        const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
+        const Mins = [weatherData.oneMin, weatherData.twoMin, weatherData.threeMin, weatherData.fourMin, weatherData.fiveMin]
 
-        let Maxs = {
-            0: weatherData.oneMax,
-            1: weatherData.twoMax,
-            2: weatherData.threeMax,
-            3: weatherData.fourMax,
-            4: weatherData.fiveMax,
-        }
-        let Mins = {
-            0: weatherData.oneMin,
-            1: weatherData.twoMin,
-            2: weatherData.threeMin,
-            3: weatherData.fourMin,
-            4: weatherData.fiveMin,
+        for (let i = 0; i < forecastModel.count; i++) {
+            forecastModel.set(i, { "maxTemp": Maxs[i], "minTemp": Mins[i] })
         }
 
-
-        for (var z = 0; z < forecastModel.count; z++) {
-            forecastModel.set(z, { "maxTemp": Maxs[z], "minTemp": Mins[z] })
+        for (let i = 0; i < hoursWeatherModel.count; i++) {
+            hoursWeatherModel.set(i, { "temp": String(parseFloat(temps[i])) })
         }
-        for (var e = 0; e < hoursWeatherModel.count; e++) {
-            var roles = hoursWeatherModel.get(e);
-            console.log("Roles for index " + e + ":", JSON.stringify(roles));
-
-            // Convierte temps[e] a cadena antes de asignarlo
-            var gy = String(parseFloat(temps[e]));
-            hoursWeatherModel.set(e, { "temp": gy });
-        }
-
-
     }
 
     Timer {
         id: checkUpdateTimer
-        interval: 5000 // 20 segundos
+        interval: 5000
         repeat: true
         running: true
         onTriggered: {
             if (weatherData.lastUpdate !== "") {
-                let now = new Date()
-                let lastUpdateDate = new Date(weatherData.lastUpdate) // Crear objeto Date desde la cadena almacenada
-                let diffMinutes = (now - lastUpdateDate) / 60000 // Convertir la diferencia a minutos
-                if (diffMinutes > 17) {
-                    forms()
-                }
+                const now = new Date()
+                const lastUpdateDate = new Date(weatherData.lastUpdate)
+                const diffMinutes = (now - lastUpdateDate) / 60000
+                if (diffMinutes > 5) forms()
             }
         }
     }
 
     function updateForecastModel() {
+        const iconsArr = [weatherData.oneIcon, weatherData.twoIcon, weatherData.threeIcon, weatherData.fourIcon, weatherData.fiveIcon]
+        const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
+        const Mins = [weatherData.oneMin, weatherData.twoMin, weatherData.threeMin, weatherData.fourMin, weatherData.fiveMin]
 
-        let icons = {
-            0: weatherData.oneIcon,
-            1: weatherData.twoIcon,
-            2: weatherData.threeIcon,
-            3: weatherData.fourIcon,
-            4: weatherData.fiveIcon,
-        }
-        let Maxs = {
-            0: weatherData.oneMax,
-            1: weatherData.twoMax,
-            2: weatherData.threeMax,
-            3: weatherData.fourMax,
-            4: weatherData.fiveMax,
-        }
-        let Mins = {
-            0: weatherData.oneMin,
-            1: weatherData.twoMin,
-            2: weatherData.threeMin,
-            3: weatherData.fourMin,
-            4: weatherData.fiveMin,
-        }
-        forecastModel.clear();
-        for (var i = 1; i < 4; i++) {
-            var icon = icons[i]
-            var maxTemp = Maxs[i]
-            var minTemp = Mins[i]
-            var date = getTranslatedDayInitial(i)
-
-            forecastModel.append({
-                date: date,
-                icon: icon,
-                maxTemp: maxTemp,
-                minTemp: minTemp
-            });
-
-
-        }
+        forecastModel.clear()
+            for (let i = 1; i < 4; i++) {
+                forecastModel.append({
+                    date: getTranslatedDayInitial(i),
+                                     icon: iconsArr[i],
+                                     maxTemp: Maxs[i],
+                                     minTemp: Mins[i]
+                })
+            }
     }
 
     function forms() {
+        currentDateTime = new Date()
         if (isUpdate) {
-            currentDateTime = new Date()
             hoursForecastUpdate()
             updateForecastModel()
         } else {
-            currentDateTime = new Date()
             hoursForecast()
             updateForecastModel()
             isUpdate = true
@@ -184,26 +132,21 @@ PlasmoidItem {
     }
 
     onUnitsTemperatureChanged: {
-        //hoursForecast()
         updateUnitsTempe()
     }
 
     Component.onCompleted: {
         weatherData.dataChanged.connect(() => {
-            Qt.callLater(forms); // Asegura que la función se ejecute al final del ciclo de eventos
-        });
+            Qt.callLater(forms)
+        })
     }
 
     preferredRepresentation: compactRepresentation
     compactRepresentation: compactRepresentation
     fullRepresentation: compactRepresentation
 
-
-
     Component {
         id: compactRepresentation
         CompactRepresentation {}
     }
-
-
 }

@@ -5,21 +5,21 @@ Item {
     property string longitud
     readonly property bool fullCoordinates: latitud !== "" && longitud !== ""
 
-    property int deepNight: 1230
-    property int day: 360
+    // Will hold sunrise/sunset in minutes
+    property int sunrise: 0
+    property int sunset: 0
     property bool isday: false
+
     property string apiUrlFinal: "https://api.sunrise-sunset.org/json?lat=" + latitud + "&lng=" + longitud + "&formatted=0"
 
     signal update
 
     Timer {
         id: delayFetchTimer
-        interval: 50 // 50ms de retardo
+        interval: 50
         repeat: false
         onTriggered: {
-            if (fullCoordinates) {
-                fetchSunData(apiUrlFinal)
-            }
+            if (fullCoordinates) fetchSunData(apiUrlFinal)
         }
     }
 
@@ -28,56 +28,60 @@ Item {
         interval: 12000
         running: false
         repeat: true
-        onTriggered: {
-            fetchSunData(apiUrlFinal)
-        }
+        onTriggered: fetchSunData(apiUrlFinal)
     }
 
-    function minutesOfDayISO8601(dat){
-        var hours = parseInt(Qt.formatDateTime(dat, "h")) * 60
-        var minutes = parseInt(Qt.formatDateTime(dat, "m"))
-        return hours + minutes;
-    }
-
-    function minutesOfDay(dat){
-        var UTCstring = dat.toUTCString();
-        let parts = UTCstring.split(" ");
-        let hoursMinutes = parts[3].split(":");
-        let hours = parseInt(hoursMinutes[0])
-        let minutes = parseInt(hoursMinutes[1])
-        return (hours * 60) + minutes
+    function minutesOfDayLocal(dateStr) {
+        var d = new Date(dateStr)
+        return d.getHours() * 60 + d.getMinutes()  // local timezone
     }
 
     function fetchSunData(url) {
         retryUpdate.stop()
-        var minutesDay = minutesOfDay(new Date())
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
+        var now = new Date()
+        var localMinutesNow = now.getHours() * 60 + now.getMinutes()
+
+        var xhr = new XMLHttpRequest()
+        xhr.open("GET", url, true)
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
+                var response = JSON.parse(xhr.responseText)
                 if (response.status === "OK") {
-                    deepNight = minutesOfDayISO8601(response.results.astronomical_twilight_end);
-                    day = minutesOfDayISO8601(response.results.sunrise);
-                    var AdjustedNightSchedule = deepNight < day ? deepNight + 1440 : deepNight
-                    isday = minutesDay > day && minutesDay < AdjustedNightSchedule
-                    console.log("isDay:", isday)
+                    sunrise = minutesOfDayLocal(response.results.sunrise)
+                    sunset  = minutesOfDayLocal(response.results.sunset)
+
+                    if (sunset < sunrise) sunset += 1440
+
+                        var adjustedNow = localMinutesNow
+                        if (localMinutesNow < sunrise && now.getHours() < 3) adjustedNow += 1440
+
+                            isday = adjustedNow >= sunrise && adjustedNow < sunset
+                            console.log("Local time minutes:", adjustedNow,
+                                        "Sunrise:", sunrise,
+                                        "Sunset:", sunset,
+                                        "isDay:", isday)
+                } else {
+                    console.log("Sun API error:", response.status)
                 }
             }
-        };
-        xhr.send();
+        }
+        xhr.send()
     }
 
-    // Al cambiar latitud o longitud, se activa un pequeño retardo antes de evaluar y llamar a fetch
+    function isDayForHour(hour) {
+        // hour in 0..23
+        if (sunrise === 0 && sunset === 0) return true  // fallback if data not loaded
+            var minutes = hour * 60
+            var adjSunset = sunset
+            if (sunset < sunrise) adjSunset += 1440
+                return minutes >= sunrise && minutes < adjSunset
+    }
+
     onLatitudChanged: delayFetchTimer.restart()
     onLongitudChanged: delayFetchTimer.restart()
 
-    // También puedes seguir usando "update" externamente
     onUpdate: {
-        if (fullCoordinates) {
-            fetchSunData(apiUrlFinal)
-        } else {
-            retryUpdate.start()
-        }
+        if (fullCoordinates) fetchSunData(apiUrlFinal)
+            else retryUpdate.start()
     }
 }

@@ -1,6 +1,6 @@
 function getNameCity(latitude, longitud, leng, callback) {
     let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitud}&accept-language=${leng}`;
-    console.log("Generated URL: ", url); // Para verificar la URL generada
+    console.log("Generated URL: ", url); // To verify the generated URL
 
     let req = new XMLHttpRequest();
     req.open("GET", url, true);

@@ -656,7 +656,7 @@ function weatherLongText(languageCode, code) {
             96: "약한 우박을 동반한 천둥 번개",
             99: "강한 우박을 동반한 천둥 번개"
         },
-        // Agrega más idiomas aquí según sea necesario
+        // Add more languages ​​here as needed
     };
 
     if (descriptions[languageCode]) {

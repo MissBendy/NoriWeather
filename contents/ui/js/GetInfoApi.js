@@ -2,8 +2,8 @@ function obtenerDatosClimaticos(latitud, longitud, fechaInicio, fechaFin, hours,
     let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&hourly=temperature_2m,weather_code&current=temperature_2m,is_day,weather_code,wind_speed_10m&hourly=uv_index&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&start_date=${fechaInicio}&end_date=${(fechaFin)}`;
 
     const now = new Date();
-    const hoursC = now.getHours(); // Horas (0-23)
-    const minutes = now.getMinutes(); // Minutos (0-59)
+    const hoursC = now.getHours(); // Hours (0-23)
+    const minutes = now.getMinutes(); // Minutes (0-59)
     const currentTime =  minutes > 44 ? hoursC + 2 : hoursC + 1;
 
 

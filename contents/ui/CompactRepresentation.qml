@@ -81,7 +81,7 @@ Item {
                     id: subtextGrados
                     height: parent.height
                     width: parent.width - textGrados.implicitWidth
-                    text: (wrapper.unitsTemperature === "0") ? " °C " : " °F "
+                    text: (wrapper.unitsTemperature === "0") ? "°C " : "°F "
                     horizontalAlignment: Text.AlignLeft
                     font.bold: boldfonts
                     font.pixelSize: fonssizes

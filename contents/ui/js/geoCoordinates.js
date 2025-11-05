@@ -13,21 +13,21 @@ function obtenerCoordenadas(callback) {
                     let longitud = datos.lon;
                     let full = `${latitud}, ${longitud}`;
                     console.log(`Coordenadas obtenidas: ${full}`);
-                    callback(full); // Devolver coordenadas completas
+                    callback(full); // Return full coordinates
                 } catch (error) {
                     console.error("Error procesando la respuesta JSON:", error);
                     callback(null); // Devolver null en caso de error de parsing
                 }
             } else {
                 console.error(`Error en la solicitud: ${req.status}`);
-                callback(null); // Devolver null en caso de error de solicitud
+                callback(null); // Return null in case of parsing error
             }
         }
     };
 
     req.onerror = function () {
         console.error("Error de red al intentar obtener coordenadas.");
-        callback(null); // Devolver null en caso de error de red
+        callback(null); // Return null in case of network error
     };
 
     req.send();

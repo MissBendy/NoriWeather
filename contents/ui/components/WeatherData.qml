@@ -12,8 +12,8 @@ Item {
   signal simpleDataReady // Definir el signal aquí
 
   function obtener(texto, indice) {
-    var palabras = texto.split(/\s+/); // Divide el texto en palabras utilizando el espacio como separador
-    return palabras[indice - 1]; // El índice - 1 porque los índices comienzan desde 0 en JavaScript
+    var palabras = texto.split(/\s+/); // Divide the text into words using space as a separator
+    return palabras[indice - 1]; // The index is -1 because indices start from 0 in JavaScript
   }
 
   function fahrenheit(temp) {
@@ -27,6 +27,8 @@ Item {
   property bool isUpdate: false
   property string lastUpdate: "0"
   property int hoursC: 0
+  property int sunriseTime: 0
+  property int sunsetTime: 0
   property string newValuesWeather: "0"
   property string newValuesForeWeather: "0"
   property bool active: plasmoid.configuration.weatheCardActive
@@ -85,18 +87,23 @@ Item {
   property string minweatherCurrent: fahrenheit(obtener(datosweather, 2))
   property string maxweatherCurrent: fahrenheit(obtener(datosweather, 3))
 
-  property var tempHours: [fahrenheit(obtener(datosweather, 9)), fahrenheit(obtener(datosweather, 10)), fahrenheit(obtener(datosweather, 11)), fahrenheit(obtener(datosweather, 12)), fahrenheit(obtener(datosweather, 13))]
+  property var tempHours: [
+    fahrenheit(obtener(datosweather, 9)),
+    fahrenheit(obtener(datosweather, 10)),
+    fahrenheit(obtener(datosweather, 11)),
+    fahrenheit(obtener(datosweather, 12)),
+    fahrenheit(obtener(datosweather, 13))
+  ]
 
 
-  property var iconHours: [asingicon(obtener(datosweather, 14)), asingicon(obtener(datosweather, 15)), asingicon(obtener(datosweather, 16)), asingicon(obtener(datosweather, 17)), asingicon(obtener(datosweather, 18)) ]
-
+  property var iconHours: []
   property string minweatherTomorrow: twoMin
   property string maxweatherTomorrow: twoMax
   property string minweatherDayAftertomorrow: threeMin
   property string maxweatherDayAftertomorrow: threeMax
   property string minweatherTwoDaysAfterTomorrow: fourMax
   property string maxweatherTwoDaysAfterTomorrow: fourMax
-  property string iconWeatherCurrent: asingicon(codeweather)
+  property string iconWeatherCurrent
   property string uvindex: uvIndexLevelAssignment(obtener(datosweather, 7))
   property string windSpeed: obtener(datosweather, 6)
 
@@ -115,97 +122,90 @@ Item {
   property string windSpeedText: Traduc.windSpeedText(codeleng)
   property int isDay: obtener(datosweather, 8)
   property string city: "unk"
-  readonly property string prefixIcon: determinateDay.isday ? "" : "-night"
+  property string prefixIcon: determinateDay.isDayForHour(new Date().getHours()) ? "" : "-night"
 
   Component.onCompleted: {
-    updateWeather(1);
+    updateWeather(1); // initial fetch of weather and coordinates
   }
 
+  // Day/night tracker
   DayOrNight {
     id: determinateDay
     latitud: root.latitude
     longitud: root.longitud
-  }
 
-  function uvIndexLevelAssignment(nivel) {
-    if (nivel < 3) {
-      return nivel + " " + Traduc.lavelUV(codeleng, 0);
-    } else {
-      if (nivel < 6) {
-        return nivel + " " + Traduc.lavelUV(codeleng, 1);
-      } else {
-        if (nivel < 8) {
-          return nivel + " " + Traduc.lavelUV(codeleng, 2);
-        } else {
-          if (nivel < 11) {
-            return nivel + " " + Traduc.lavelUV(codeleng, 3);
-          } else {
-            return nivel + " " + Traduc.lavelUV(codeleng, 4);
-          }
-        }
+    onIsdayChanged: {
+      // Only update icons when sunrise/sunset are ready
+      if (sunrise && sunset) {
+        updateIcons();
+        if (fullCoordinates) updateWeather(2); // refresh weather after day/night data
       }
     }
   }
 
+  // UV index helper
+  function uvIndexLevelAssignment(nivel) {
+    if (nivel < 3) return nivel + " " + Traduc.lavelUV(codeleng, 0);
+    if (nivel < 6) return nivel + " " + Traduc.lavelUV(codeleng, 1);
+    if (nivel < 8) return nivel + " " + Traduc.lavelUV(codeleng, 2);
+    if (nivel < 11) return nivel + " " + Traduc.lavelUV(codeleng, 3);
+    return nivel + " " + Traduc.lavelUV(codeleng, 4);
+  }
+
+  // Fetch coordinates via IP
   function getCoordinatesWithIp() {
     GeoCoordinates.obtenerCoordenadas(function(result) {
-
-        completeCoordinates = result;
-        retryCoordinate.start()
+      completeCoordinates = result;
+      retryCoordinate.start();
     });
   }
 
+  // Watch for coordinate changes
   onObserverCoordenatesChanged: {
-    console.log("Coordenadas cambiaron, actualizando clima");
+    console.log("Coordinates changed, updating weather");
     if (latitude && longitud && latitude !== "0" && longitud !== "0") {
       updateWeather(2);
-      getCityFuncion();
+      getCityFunction();
     } else {
-      console.warn("Coordenadas inválidas, reintentando...");
+      console.warn("Invalid coordinates, retrying...");
       retryCoordinate.start();
     }
   }
 
-  function getCityFuncion() {
-
+  // City lookup
+  function getCityFunction() {
     if (!latitude || !longitud || latitude === "0" || longitud === "0") {
-        console.error("Coordenadas inválidas para la solicitud de ciudad");
-        return;
+      console.error("Invalid coordinates for city request");
+      return;
     }
     GetCity.getNameCity(latitude, longitud, codeleng, function(result) {
-
-        city = result;
-        retrycity.start()
+      city = result;
+      retrycity.start();
     });
-}
+  }
 
+  // Weather API
   function getWeatherApi() {
     GetInfoApi.obtenerDatosClimaticos(latitude, longitud, day, finDay, currentTime, function(result) {
+      if (isUpdate) newValuesWeather = result;
+      else datosweather = result;
 
-        if (isUpdate) {
-          newValuesWeather = result;
-        } else {
-          datosweather = result;
-        }
-        getForecastWeather()
-        retry.start()
+      getForecastWeather();
+      retry.start();
     });
   }
 
+  // Forecast
   function getForecastWeather() {
     GetModelWeather.GetForecastWeather(latitude, longitud, day, therday, function(result) {
-      if (isUpdate) {
-        newValuesForeWeather = result
-      } else {
-        forecastWeather = result
-      };
+      if (isUpdate) newValuesForeWeather = result;
+      else forecastWeather = result;
     });
   }
 
-
-
-  function asingicon(x, b) {
-    let wmocodes = {
+  // Icon assignment
+  function asingicon(code, isDay = null) {
+    const wmocodes = {
       0: "clear",
       1: "few-clouds",
       2: "few-clouds",
@@ -231,12 +231,48 @@ Item {
       86: "snow",
       95: "storm",
       96: "storm",
-      99: "storm",
+      99: "storm"
     };
-    var iconName = "weather-" + (wmocodes[x] || "unknown");
-    var iconNamePresicion = iconName + prefixIcon
-    return b === "preciso" ? iconNamePresicion : iconName;
+    let iconName = "weather-" + (wmocodes[code] || "unknown");
+    if (isDay !== null) return iconName + (isDay ? "" : "-night");
+    return iconName + (determinateDay.isday ? "" : "-night");
   }
+
+  // Update icons
+  function updateIcons() {
+    function safeObtener(data, index) {
+      if (!data || data === "0") return 0
+        let value = obtener(data, index)
+        return value !== undefined ? value : 0
+    }
+
+    iconWeatherCurrent = asingicon(codeweather || 0)
+    iconHours = []
+
+    const now = new Date()
+    const sunrise = determinateDay.sunrise // in minutes
+    let sunset  = determinateDay.sunset    // in minutes
+
+    if (sunset < sunrise) sunset += 1440 // handle sunset past midnight
+
+      // Determine day/night for any Date
+      function isDayAtTime(time) {
+        let minutesOfDay = time.getHours() * 60 + time.getMinutes()
+        if (minutesOfDay < sunrise) minutesOfDay += 1440
+          return minutesOfDay >= sunrise && minutesOfDay < sunset
+      }
+
+      // Forecast hours start at the next full hour
+      const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1
+
+      for (let i = 0; i < 5; i++) {
+        const code = safeObtener(datosweather, 14 + i)
+        const forecastTime = new Date(now.getTime())
+        forecastTime.setHours(nextHour + i, 0, 0, 0) // next full hour
+          iconHours.push(asingicon(code, isDayAtTime(forecastTime)) || "weather-unknown")
+      }
+  }
+
 
   function textWeather(x) {
     let text = {
@@ -311,6 +347,7 @@ Item {
         } else {
           getWeatherApi()
           determinateDay.update()
+          updateIcons()
         }
       }
     }
@@ -318,6 +355,7 @@ Item {
     if (x === 2) {
       getWeatherApi();
       determinateDay.update()
+      updateIcons()
     }
   }
 
@@ -336,6 +374,7 @@ Item {
       forecastWeather = newValuesForeWeather;
       newValuesWeather = "0";
       newValuesForeWeather= "0";
+      updateIcons()
     }
   }
 

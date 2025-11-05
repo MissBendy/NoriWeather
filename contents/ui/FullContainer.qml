@@ -28,10 +28,10 @@ Item {
         Kirigami.Heading {
             id: city
             width: parent.width - leftPanel.marginLeftReal
-            text: wrapper.location //"Ciudad"
+            text: wrapper.location //"Phoenix"
             color: Kirigami.Theme.highlightedTextColor
-            level: 3
-            font.weight: Font.DemiBold
+            level: 1
+            font.weight: Font.Medium
             elide: Text.ElideRight
         }
         Row {
@@ -44,7 +44,7 @@ Item {
             Kirigami.Icon {
                 id: logo
                 source: wrapper.currentIcon
-                width: Kirigami.Units.iconSizes.medium
+                width: Kirigami.Units.iconSizes.large
                 height: width
                 color: Kirigami.Theme.highlightedTextColor
                 anchors.verticalCenter: parent.verticalCenter
@@ -53,10 +53,10 @@ Item {
            Controls.Label {
                 id: text
                 width: parent.width - logo.width
-                text: wrapper.currentTemp
+                text: wrapper.currentTemp + "°"
                 color: Kirigami.Theme.highlightedTextColor
-                font.weight: Font.DemiBold
-                font.pixelSize: logo.height
+                font.weight: Font.Normal
+                font.pixelSize: 38
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -66,22 +66,22 @@ Item {
             width: current.width
             height: textDo.implicitHeight * 2
             anchors.topMargin: spacingElements
-            opacity: 0.7
+            opacity: 0.85
             Kirigami.Heading {
                 id: textDo
                 width: parent.width - leftPanel.marginLeftReal
-                text: wrapper.weather //"Summy"
+                text: wrapper.weather //"Sunny"
                 color: Kirigami.Theme.highlightedTextColor
                 level: 5
-                //font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 elide: Text.ElideRight
             }
             Kirigami.Heading {
                 width: parent.width - leftPanel.marginLeftReal
-                text: wrapper.currentMaxMin
+                text: wrapper.currentMaxMin.replace("/", " / ")
                 color: Kirigami.Theme.highlightedTextColor
                 level: 5
-                //font.weight: Font.DemiBold
+                font.weight: Font.Medium
                 elide: Text.ElideRight
             }
         }
