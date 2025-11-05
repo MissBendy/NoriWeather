@@ -63,7 +63,7 @@ Item {
             delegate: Row {
                 height: parent.height / 3
                 width: parent.width
-                spacing: 8
+                spacing: 6
 
                 Kirigami.Heading {
                     id: day

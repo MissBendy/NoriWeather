@@ -110,7 +110,7 @@ Item {
             id: rootItem
             Layout.minimumWidth:  Kirigami.Units.gridUnit * 20
             Layout.maximumWidth:  minimumWidth
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 10 // 170
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 11 // 170
             Layout.maximumHeight: minimumHeight
             focus: true
 
