@@ -257,9 +257,17 @@ Item {
 
       // Determine day/night for any Date
       function isDayAtTime(time) {
-        let minutesOfDay = time.getHours() * 60 + time.getMinutes()
-        if (minutesOfDay < sunrise) minutesOfDay += 1440
-          return minutesOfDay >= sunrise && minutesOfDay < sunset
+        let minutesOfDay = time.getHours() * 60 + time.getMinutes();
+        let sunrise = determinateDay.sunrise;
+        let sunset = determinateDay.sunset;
+
+        // handle if sunset is past midnight
+        if (sunset < sunrise) sunset += 1440;
+
+        // wrap around minutesOfDay if before sunrise
+        if (minutesOfDay < sunrise) minutesOfDay += 1440;
+
+        return minutesOfDay >= sunrise && minutesOfDay < sunset;
       }
 
       // Forecast hours start at the next full hour
