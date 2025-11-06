@@ -50,13 +50,13 @@ Item {
   property string observer: datosweather + forecastWeather
   property int retrysCity: 0
 
-  property string oneIcon: asingicon(obtener(forecastWeather, 1))
-  property string twoIcon: asingicon(obtener(forecastWeather, 2))
-  property string threeIcon: asingicon(obtener(forecastWeather, 3))
-  property string fourIcon: asingicon(obtener(forecastWeather, 4))
-  property string fiveIcon: asingicon(obtener(forecastWeather, 5))
-  property string sixIcon: asingicon(obtener(forecastWeather, 6))
-  property string sevenIcon: asingicon(obtener(forecastWeather, 7))
+  property string oneIcon: asingicon(obtener(forecastWeather, 1), true)
+  property string twoIcon: asingicon(obtener(forecastWeather, 2), true)
+  property string threeIcon: asingicon(obtener(forecastWeather, 3), true)
+  property string fourIcon: asingicon(obtener(forecastWeather, 4), true)
+  property string fiveIcon: asingicon(obtener(forecastWeather, 5), true)
+  property string sixIcon: asingicon(obtener(forecastWeather, 6), true)
+  property string sevenIcon: asingicon(obtener(forecastWeather, 7), true)
   property int oneMax: fahrenheit(obtener(forecastWeather, 8))
   property int twoMax: fahrenheit(obtener(forecastWeather, 9))
   property int threeMax: fahrenheit(obtener(forecastWeather, 10))
