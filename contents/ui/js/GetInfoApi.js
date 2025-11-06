@@ -4,8 +4,8 @@ function obtenerDatosClimaticos(latitud, longitud, fechaInicio, fechaFin, hours,
     const now = new Date();
     const hoursC = now.getHours(); // Hours (0-23)
     const minutes = now.getMinutes(); // Minutes (0-59)
-    const currentTime =  minutes > 44 ? hoursC + 2 : hoursC + 1;
-
+    // Match QML logic: jump 1 hour ahead if minutes != 0
+    const currentTime = (minutes === 0) ? hoursC : (hoursC + 1) % 24;
 
     let req = new XMLHttpRequest();
     req.open("GET", url, true);
@@ -28,18 +28,18 @@ function obtenerDatosClimaticos(latitud, longitud, fechaInicio, fechaFin, hours,
                 let propabilityUVindex = hourly.uv_index[hours];
 
                 let tempForecastHorylOne = hourly.temperature_2m[currentTime];
-                let tempForecastHorylTwo = hourly.temperature_2m[currentTime + 1];
-                let tempForecastHorylThree = hourly.temperature_2m[currentTime + 2];
-                let tempForecastHorylFour = hourly.temperature_2m[currentTime + 3];
-                let tempForecastHorylFive = hourly.temperature_2m[currentTime + 4];
+                let tempForecastHorylTwo = hourly.temperature_2m[(currentTime + 1) % 24];
+                let tempForecastHorylThree = hourly.temperature_2m[(currentTime + 2) % 24];
+                let tempForecastHorylFour = hourly.temperature_2m[(currentTime + 3) % 24];
+                let tempForecastHorylFive = hourly.temperature_2m[(currentTime + 4) % 24];
 
                 let hoursWether = tempForecastHorylOne + " " + tempForecastHorylTwo + " " + tempForecastHorylThree + " " + tempForecastHorylFour + " " + tempForecastHorylFive
 
                 let codeForecastHorylOne = hourly.weather_code[currentTime];
-                let codeForecastHorylTwo = hourly.weather_code[currentTime + 1];
-                let codeForecastHorylThree = hourly.weather_code[currentTime + 2];
-                let codeForecastHorylFour = hourly.weather_code[currentTime + 3];
-                let codeForecastHorylFive = hourly.weather_code[currentTime + 4];
+                let codeForecastHorylTwo = hourly.weather_code[(currentTime + 1) % 24];
+                let codeForecastHorylThree = hourly.weather_code[(currentTime + 2) % 24];
+                let codeForecastHorylFour = hourly.weather_code[(currentTime + 3) % 24];
+                let codeForecastHorylFive = hourly.weather_code[(currentTime + 4) % 24];
 
                 let weather_codeWether = codeForecastHorylOne + " " + codeForecastHorylTwo + " " + codeForecastHorylThree + " " + codeForecastHorylFour + " " + codeForecastHorylFive
 

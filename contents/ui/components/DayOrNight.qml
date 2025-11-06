@@ -26,7 +26,7 @@ Item {
     Timer {
         id: retryUpdate
         interval: 12000
-        running: false
+        running: true
         repeat: true
         onTriggered: fetchSunData(apiUrlFinal)
     }

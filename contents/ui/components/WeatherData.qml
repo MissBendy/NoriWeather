@@ -442,6 +442,24 @@ Item {
   }
 
   Timer {
+    id: hourlyIconRefresh
+    interval: 10000 // check every 10 seconds
+    running: true
+    repeat: true
+    property int lastHour: new Date().getHours()
+
+    onTriggered: {
+      const currentHour = new Date().getHours()
+      if (currentHour !== lastHour) {
+        lastHour = currentHour
+        // Force day/night recomputation immediately
+        determinateDay.update()
+        updateIcons()
+      }
+    }
+  }
+
+  Timer {
     id: observateHours
     interval: 1000
     running: true

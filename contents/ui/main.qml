@@ -21,7 +21,7 @@ PlasmoidItem {
     property string location: weatherData.city
     property string weather: weatherData.weatherShottext
     property string currentIcon: weatherData.iconWeatherCurrent
-    property string currentMaxMin: weatherData.maxweatherCurrent + "°/" + weatherData.minweatherCurrent + "°"
+    property string currentMaxMin: weatherData.maxweatherCurrent + "° / " + weatherData.minweatherCurrent + "°"
     property var temps: weatherData.tempHours
     property var icons: weatherData.iconHours
     property alias forecastHours: hoursWeatherModel
