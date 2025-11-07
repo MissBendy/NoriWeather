@@ -104,6 +104,8 @@ Item {
   property string maxweatherDayAftertomorrow: threeMax
   property string minweatherTwoDaysAfterTomorrow: fourMax
   property string maxweatherTwoDaysAfterTomorrow: fourMax
+  property string minweatherThreeDaysAfterTomorrow: fiveMax
+  property string maxweatherThreeDaysAfterTomorrow: fiveMax
   property string iconWeatherCurrent
   property string uvindex: uvIndexLevelAssignment(obtener(datosweather, 7))
   property string windSpeed: obtener(datosweather, 6)

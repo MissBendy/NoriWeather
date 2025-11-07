@@ -29,7 +29,7 @@ Item {
             id: city
             width: parent.width - leftPanel.marginLeftReal
             text: wrapper.location
-            color: Kirigami.Theme.highlightedTextColor
+            color: Kirigami.Theme.textColor
             level: 1
             font.weight: Font.Medium
             elide: Text.ElideRight
@@ -48,7 +48,6 @@ Item {
                 source: wrapper.currentIcon
                 width: Kirigami.Units.iconSizes.large
                 height: width
-                color: Kirigami.Theme.highlightedTextColor
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -56,7 +55,7 @@ Item {
                 id: text
                 width: implicitWidth  // use implicitWidth for dynamic sizing
                 text: wrapper.currentTemp + "°"
-                color: Kirigami.Theme.highlightedTextColor
+                color: Kirigami.Theme.textColor
                 font.weight: Font.Normal
                 font.pixelSize: 38
                 anchors.verticalCenter: parent.verticalCenter
@@ -74,7 +73,7 @@ Item {
                 id: textDo
                 width: parent.width - leftPanel.marginLeftReal
                 text: wrapper.weather
-                color: Kirigami.Theme.highlightedTextColor
+                color: Kirigami.Theme.textColor
                 level: 5
                 font.weight: Font.Medium
                 elide: Text.ElideRight
@@ -82,8 +81,8 @@ Item {
 
             Kirigami.Heading {
                 width: parent.width - leftPanel.marginLeftReal
-                text: wrapper.currentMaxMin.replace("/", " / ")
-                color: Kirigami.Theme.highlightedTextColor
+                text: wrapper.currentMaxMin
+                color: Kirigami.Theme.textColor
                 level: 5
                 font.weight: Font.Medium
                 elide: Text.ElideRight
@@ -100,7 +99,7 @@ Item {
             id: link
             width: parent.width
             text: "open-meteo.com"
-            color: Kirigami.Theme.highlightedTextColor
+            color: Kirigami.Theme.textColor
             level: 5
             font.underline: true
             opacity: 0.4

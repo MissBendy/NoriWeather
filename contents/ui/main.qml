@@ -72,7 +72,7 @@ PlasmoidItem {
     function hoursForecastUpdate() {
         const forecastHoursArr = getNextForecastHours()
         for (let i = 0; i < hoursWeatherModel.count; i++) {
-            hoursWeatherModel.set(i, { "icon": icons[i], "temp": String(parseFloat(temps[i])), "hours": forecastHoursArr[i] })
+            hoursWeatherModel.set(i, { "icon": icons[i], "temp": parseFloat(temps[i]), "hours": forecastHoursArr[i] })
         }
     }
 
@@ -85,7 +85,7 @@ PlasmoidItem {
         }
 
         for (let i = 0; i < hoursWeatherModel.count; i++) {
-            hoursWeatherModel.set(i, { "temp": String(parseFloat(temps[i])) })
+            hoursWeatherModel.set(i, { "temp": parseFloat(temps[i]) })
         }
     }
 

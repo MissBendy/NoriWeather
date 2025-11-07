@@ -10,10 +10,6 @@ Item {
 
     signal configurationChanged
 
-    //QtObject {
-      //  id: toCurrency
-        //property var value
-    //}
     QtObject {
         id: fontsizeValue
         property var value
@@ -57,11 +53,7 @@ Item {
             CheckBox {
                 id: coordinatesIP
             }
-        }
 
-
-        GridLayout{
-            columns: 2
             Label {
                 Layout.minimumWidth: root.width/2
                 text: i18n("Latitude") + ":"
@@ -85,8 +77,6 @@ Item {
                 width: 110
             }
 
-
-
             Label {
                 Layout.minimumWidth: root.width/2
                 text: i18n("Display weather conditions on the panel") + ":"
@@ -94,10 +84,11 @@ Item {
             }
             CheckBox {
                 id: displayWeather
+
             }
             Label {
                 Layout.minimumWidth: root.width/2
-                text: i18n("Bold Weather Conditions") + ":"
+                text: i18n("Bold weather conditions on the panel") + ":"
                 horizontalAlignment: Label.AlignRight
             }
             CheckBox {
@@ -120,7 +111,6 @@ Item {
                 onActivated: timeFormatValue.value = currentValue
                 Component.onCompleted: currentIndex = indexOfValue(timeFormatValue.value)
             }
-
 
             Label {
                 Layout.minimumWidth: root.width/2
