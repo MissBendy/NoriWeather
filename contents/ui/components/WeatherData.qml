@@ -102,10 +102,8 @@ Item {
   property string maxweatherTomorrow: twoMax
   property string minweatherDayAftertomorrow: threeMin
   property string maxweatherDayAftertomorrow: threeMax
-  property string minweatherTwoDaysAfterTomorrow: fourMax
+  property string minweatherTwoDaysAfterTomorrow: fourMin
   property string maxweatherTwoDaysAfterTomorrow: fourMax
-  property string minweatherThreeDaysAfterTomorrow: fiveMax
-  property string maxweatherThreeDaysAfterTomorrow: fiveMax
   property string iconWeatherCurrent
   property string uvindex: uvIndexLevelAssignment(obtener(datosweather, 7))
   property string windSpeed: obtener(datosweather, 6)
@@ -138,13 +136,12 @@ Item {
     longitud: root.longitud
 
     onIsdayChanged: {
-      // Update icons immediately when day/night flips
-      updateIcons();
+      updateIcons(); // refresh current icon immediately
 
       // Optionally refresh weather if needed
       if (fullCoordinates) updateWeather(2);
 
-      // Schedule next update at sunrise/sunset
+      // Schedule next update at sunrise or sunset
       if (nextEventTimer.running) nextEventTimer.stop();
       let now = new Date();
       let nextEvent = isday ? new Date(sunsetTime) : new Date(sunriseTime);
@@ -200,6 +197,7 @@ Item {
       if (isUpdate) newValuesWeather = result;
       else datosweather = result;
 
+      updateIcons(); // <-- refresh immediately, no delay
       getForecastWeather();
       retry.start();
     });
@@ -258,21 +256,19 @@ Item {
       return value !== undefined ? value : 0;
     }
 
-    // Current weather icon uses DayOrNight component
-    iconWeatherCurrent = asingicon(codeweather || 0, determinateDay.isday);
-
-    iconHours = [];
     const now = new Date();
-    const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1;
+    const currentHour = now.getHours();
 
+    // Update current weather icon using DayOrNight
+    iconWeatherCurrent = asingicon(codeweather || 0, determinateDay.isDayForHour(currentHour));
+
+    // Update next 5 hourly forecast icons
+    iconHours = [];
     for (let i = 0; i < 5; i++) {
-      const code = safeObtener(datosweather, 14 + i);
       const forecastTime = new Date(now.getTime());
-      forecastTime.setHours(nextHour + i, 0, 0, 0);
-
-      // Determine day/night using DayOrNight component
+      forecastTime.setHours(currentHour + i + 1, 0, 0, 0); // next hours
       const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
-
+      const code = safeObtener(datosweather, 14 + i); // adjust index if necessary
       iconHours.push(asingicon(code, isDayAtTime) || "weather-unknown");
     }
   }
@@ -438,30 +434,49 @@ Item {
     }
   }
 
+  // Hourly on-the-dot weather fetch
+  Timer {
+    id: hourlyWeatherUpdate
+    running: true
+    repeat: true
+    interval: 0
+    onTriggered: {
+      updateWeather(1);           // fetch latest weather
+      determinateDay.update();    // recompute day/night
+      updateIcons();              // refresh all icons
+
+      // calculate milliseconds until 1 second after next hour
+      let now = new Date();
+      let nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 1, 0);
+      interval = nextHour - now;
+      start();
+    }
+  }
+
   Timer {
     id: nextEventTimer
     running: false
     repeat: false
     onTriggered: {
-      determinateDay.update();  // forces isDay to recompute at exact sunrise/sunset
-      updateIcons();
+      determinateDay.update();  // recompute isDay
+      updateIcons();            // refresh current icon at sunrise/sunset
     }
   }
 
+  // Timer to check hour rollover
   Timer {
     id: hourlyIconRefresh
-    interval: 10000 // check every 10 seconds
+    interval: 1000 // check every 10 seconds
     running: true
     repeat: true
     property int lastHour: new Date().getHours()
-
     onTriggered: {
-      const currentHour = new Date().getHours()
+      const currentHour = new Date().getHours();
       if (currentHour !== lastHour) {
-        lastHour = currentHour
-        // Force day/night recomputation immediately
-        determinateDay.update()
-        updateIcons()
+        lastHour = currentHour;
+        // recompute day/night and icons
+        determinateDay.update();
+        Qt.callLater(() => updateIcons()); // ensures DayOrNight is ready
       }
     }
   }
