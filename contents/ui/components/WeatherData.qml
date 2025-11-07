@@ -37,6 +37,7 @@ Item {
   property string latitudeC: plasmoid.configuration.manualLatitude
   property string longitudeC: plasmoid.configuration.manualLongitude
   property string temperatureUnit: plasmoid.configuration.temperatureUnit
+  property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
 
   property string latitude: (useCoordinatesIp === "true") ? latitudeIP : (latitudeC === "0") ? latitudeIP : latitudeC
   property string longitud: (useCoordinatesIp === "true") ? longitudIP : (longitudeC === "0") ? longitudIP : longitudeC

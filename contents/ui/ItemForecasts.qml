@@ -23,16 +23,23 @@ Item {
 
                     Kirigami.Heading {
                         text: {
-                            var hour12 = model.hours % 12;
-                            if (hour12 === 0) hour12 = 12;
-                            var suffix = (model.hours >= 12 && model.hours < 24) ? "pm" : "am";
-                            return hour12 + suffix;
+                            if (wrapper.timeFormat === 24) {
+                                // 24-hour format
+                                return model.hours;
+                            } else {
+                                // 12-hour format
+                                var hour12 = model.hours % 12;
+                                if (hour12 === 0) hour12 = 12;
+                                var suffix = (model.hours >= 12) ? "pm" : "am";
+                                return hour12 + suffix;
+                            }
                         }
                         color: Kirigami.Theme.textColor
                         level: 5
                         horizontalAlignment: Text.AlignHCenter
                         width: parent.width
                     }
+
 
                     Kirigami.Icon {
                         source: model.icon

@@ -119,7 +119,6 @@ Item {
                 leftPanelMargin: backgroundSvg.margins.left
                 topPanelMargin: backgroundSvg.margins.top
                 exedentHight: backgroundSvg.margins.top + backgroundSvg.margins.bottom
-                widthOfLeftPanel: 130
                 width: widthOfLeftPanel
                 height: parent.height
             }

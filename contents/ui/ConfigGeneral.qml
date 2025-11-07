@@ -24,11 +24,17 @@ Item {
         property var value
     }
 
+    QtObject {
+        id: timeFormatValue
+        property var value
+    }
+
     property alias cfg_coordinatesIP: coordinatesIP.checked
     property alias cfg_displayWeatherInPanel: displayWeather.checked
     property alias cfg_manualLatitude: latitude.text
     property alias cfg_manualLongitude: longitude.text
     property alias cfg_temperatureUnit: unidWeatherValue.value
+    property alias cfg_timeFormat: timeFormatValue.value
     property alias cfg_sizeFontConfig: fontsizeValue.value
     property alias cfg_fontBoldWeather: boldWeather.checked
 
@@ -96,6 +102,23 @@ Item {
             }
             CheckBox {
                 id: boldWeather
+            }
+
+            Label {
+                Layout.minimumWidth: root.width/2
+                text: i18n("Time format") + ":"
+                horizontalAlignment: Label.AlignRight
+            }
+            ComboBox {
+                textRole: "text"
+                valueRole: "value"
+                id: timeFormatComboBox
+                model: [
+                    { text: i18n("12-hour"), value: 12 },
+                    { text: i18n("24-hour"), value: 24 }
+                ]
+                onActivated: timeFormatValue.value = currentValue
+                Component.onCompleted: currentIndex = indexOfValue(timeFormatValue.value)
             }
 
 

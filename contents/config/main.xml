@@ -20,6 +20,10 @@
       <default>0</default>
     </entry>
 
+    <entry name="timeFormat" type="Int">
+      <default>12</default>
+    </entry>
+
     <entry name="temperatureUnit" type="Int">
       <default>1</default>
     </entry>

@@ -3,8 +3,8 @@
     "KPlugin": {
         "Authors": [
             {
-                "Email": "adolfo@librepixels.com",
-                "Name": "zayronxio"
+                "Email": "Klipo89@gmail.com ",
+                "Name": "MissBendy"
             }
         ],
         "BugReportUrl": "",
@@ -12,10 +12,10 @@
         "Description": "",
         "EnabledByDefault": true,
         "Icon": "weather",
-        "Id": "Nori.Weather",
+        "Id": "KDE.Weather",
         "License": "GPL-2.0+",
-        "Name": "Nori Weather",
-        "Website": "https://store.kde.org/p/2230382/"
+        "Name": "KDE Weather",
+        "Website": "https://github.com/MissBendy/NoriWeather"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }
