@@ -18,7 +18,7 @@ function getNameCity(latitude, longitud, leng, callback) {
                     console.log(full);
                     callback(full);
                 } catch (e) {
-                    console.error("Error al analizar la respuesta JSON: ", e);
+                    console.error("Error parsing the response JSON: ", e);
                 }
             } else {
                 console.error(`city failed`);
@@ -27,11 +27,11 @@ function getNameCity(latitude, longitud, leng, callback) {
     };
 
     req.onerror = function () {
-        console.error("La solicitud falló");
+        console.error("The request failed");
     };
 
     req.ontimeout = function () {
-        console.error("La solicitud excedió el tiempo de espera");
+        console.error("The request exceeded the waiting time");
     };
 
     req.send();

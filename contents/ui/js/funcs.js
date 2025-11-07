@@ -3,6 +3,6 @@ function sumarDia(a) {
     var fechaActual = new Date();
     fechaActual.setDate(fechaActual.getDate() + a);
     var fechaFormateada = Qt.formatDateTime(fechaActual, "dddd");
-    console.log("Fecha con un día añadido:", fechaFormateada);
+    console.log("Date with one day added:", fechaFormateada);
     return fechaFormateada;
 }

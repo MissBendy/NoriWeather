@@ -17,7 +17,6 @@ Item {
         anchors.leftMargin: - leftPanelMargin
         anchors.top: parent.top
         anchors.topMargin: - topPanelMargin
-        leftPanelColor: Kirigami.Theme.highlightColor
         width: widthOfLeftPanel
         height: parent.height + exedentHight
     }

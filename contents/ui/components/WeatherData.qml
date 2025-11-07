@@ -8,8 +8,8 @@ import "../js/GetModelWeather.js" as GetModelWeather
 
 Item {
   id: root
-  signal dataChanged // Definir el signal aquí
-  signal simpleDataReady // Definir el signal aquí
+  signal dataChanged // Define the signal here
+  signal simpleDataReady // Define the signal here
 
   function obtener(texto, indice) {
     var palabras = texto.split(/\s+/); // Divide the text into words using space as a separator
@@ -120,7 +120,7 @@ Item {
 
   property string uvtext: Traduc.uvRadiationText(codeleng)
   property string windSpeedText: Traduc.windSpeedText(codeleng)
-  property int isDay: obtener(datosweather, 8)
+  property bool isDay: determinateDay.isday
   property string city: "unk"
   property string prefixIcon: determinateDay.isDayForHour(new Date().getHours()) ? "" : "-night"
 
@@ -135,11 +135,18 @@ Item {
     longitud: root.longitud
 
     onIsdayChanged: {
-      // Only update icons when sunrise/sunset are ready
-      if (sunrise && sunset) {
-        updateIcons();
-        if (fullCoordinates) updateWeather(2); // refresh weather after day/night data
-      }
+      // Update icons immediately when day/night flips
+      updateIcons();
+
+      // Optionally refresh weather if needed
+      if (fullCoordinates) updateWeather(2);
+
+      // Schedule next update at sunrise/sunset
+      if (nextEventTimer.running) nextEventTimer.stop();
+      let now = new Date();
+      let nextEvent = isday ? new Date(sunsetTime) : new Date(sunriseTime);
+      if (nextEvent <= now) nextEvent = new Date(nextEvent.getTime() + 24*60*60*1000);
+      nextEventTimer.start(nextEvent - now);
     }
   }
 
@@ -234,52 +241,39 @@ Item {
       99: "storm"
     };
     let iconName = "weather-" + (wmocodes[code] || "unknown");
-    if (isDay !== null) return iconName + (isDay ? "" : "-night");
-    return iconName + (determinateDay.isday ? "" : "-night");
+
+    // Use explicit isDay if provided; otherwise rely on DayOrNight component
+    const dayStatus = (isDay !== null) ? isDay : determinateDay.isday;
+    return iconName + (dayStatus ? "" : "-night");
   }
 
   // Update icons
   function updateIcons() {
     function safeObtener(data, index) {
-      if (!data || data === "0") return 0
-        let value = obtener(data, index)
-        return value !== undefined ? value : 0
+      if (!data || data === "0") return 0;
+      let value = obtener(data, index);
+      return value !== undefined ? value : 0;
     }
 
-    iconWeatherCurrent = asingicon(codeweather || 0)
-    iconHours = []
+    // Current weather icon uses DayOrNight component
+    iconWeatherCurrent = asingicon(codeweather || 0, determinateDay.isday);
 
-    const now = new Date()
-    const sunrise = determinateDay.sunrise // in minutes
-    let sunset  = determinateDay.sunset    // in minutes
+    iconHours = [];
+    const now = new Date();
+    const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1;
 
-    if (sunset < sunrise) sunset += 1440 // handle sunset past midnight
+    for (let i = 0; i < 5; i++) {
+      const code = safeObtener(datosweather, 14 + i);
+      const forecastTime = new Date(now.getTime());
+      forecastTime.setHours(nextHour + i, 0, 0, 0);
 
-      // Determine day/night for any Date
-      function isDayAtTime(time) {
-        let minutesOfDay = time.getHours() * 60 + time.getMinutes();
-        let sunrise = determinateDay.sunrise;
-        let sunset = determinateDay.sunset;
+      // Determine day/night using DayOrNight component
+      const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
 
-        // handle if sunset is past midnight
-        if (sunset < sunrise) sunset += 1440;
-
-        // wrap around minutesOfDay if before sunrise
-        if (minutesOfDay < sunrise) minutesOfDay += 1440;
-
-        return minutesOfDay >= sunrise && minutesOfDay < sunset;
-      }
-
-      // Forecast hours start at the next full hour
-      const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1
-
-      for (let i = 0; i < 5; i++) {
-        const code = safeObtener(datosweather, 14 + i)
-        const forecastTime = new Date(now.getTime())
-        forecastTime.setHours(nextHour + i, 0, 0, 0) // next full hour
-          iconHours.push(asingicon(code, isDayAtTime(forecastTime)) || "weather-unknown")
-      }
+      iconHours.push(asingicon(code, isDayAtTime) || "weather-unknown");
+    }
   }
+
 
 
   function textWeather(x) {
@@ -438,6 +432,16 @@ Item {
       determinateDay.update()
       //updateWeather(1);
       //veri.start()
+    }
+  }
+
+  Timer {
+    id: nextEventTimer
+    running: false
+    repeat: false
+    onTriggered: {
+      determinateDay.update();  // forces isDay to recompute at exact sunrise/sunset
+      updateIcons();
     }
   }
 

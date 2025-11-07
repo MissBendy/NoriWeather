@@ -18,7 +18,7 @@ function GetForecastWeather(latitud, longitud, fechaInicio, fechaFin, callback) 
                  console.log(`${full}`);
                  callback(full);
              } else {
-                 console.error(`Error en la solicitud: ${req.status}`);
+                 console.error(`Error in the request: ${req.status}`);
              }
          }
      };

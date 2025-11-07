@@ -5,7 +5,7 @@ import Qt5Compat.GraphicalEffects
 
 Item {
     property int marginLeft: maskSvg2.marg
-    property color leftColor: "red"
+    property color leftColor: "cyan"
 
     Grid {
         id: maskSvg2

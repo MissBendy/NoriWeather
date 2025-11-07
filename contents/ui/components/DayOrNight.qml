@@ -8,7 +8,7 @@ Item {
     // Will hold sunrise/sunset in minutes
     property int sunrise: 0
     property int sunset: 0
-    property bool isday: false
+    property bool isday: true
 
     property string apiUrlFinal: "https://api.sunrise-sunset.org/json?lat=" + latitud + "&lng=" + longitud + "&formatted=0"
 

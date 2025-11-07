@@ -51,7 +51,7 @@ function obtenerDatosClimaticos(latitud, longitud, fechaInicio, fechaFin, hours,
                 callback(full);
                 console.log(`https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&hourly=temperature_2m,weather_code&current=temperature_2m,is_day,weather_code,wind_speed_10m&hourly=uv_index&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&start_date=${fechaInicio}&end_date=${fechaInicio}`)
             } else {
-                console.error(`Error en la solicitud: weathergeneral ${req.status}`);
+                console.error(`Error in request: weathergeneral ${req.status}`);
                 //callback(`failed ${req.status}`)
             }
         }
