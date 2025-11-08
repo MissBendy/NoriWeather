@@ -17,10 +17,10 @@ Item {
   }
 
   function temperature(temp) {
-    if (temperatureUnit == 0) {
-      return temp;
+    if (Number(temperatureUnit) === 0) {
+      return Math.round(temp)    // round Celsius values
     } else {
-      return Math.round((temp * 9 / 5) + 32);
+      return Math.round((temp * 9 / 5) + 32)
     }
   }
 
@@ -502,5 +502,10 @@ Item {
       isInExecution = true
     }
   }
-}
 
+  onTemperatureUnitChanged: {
+    if (dataweather && dataweather !== "0") {
+      currentTemperature = temperature(obtain(dataweather, 1))
+    }
+  }
+}
