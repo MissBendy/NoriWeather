@@ -16,7 +16,7 @@ Item {
     return words[index - 1]; // The index is -1 because indexes start from 0 in JavaScript
   }
 
-  function fahrenheit(temp) {
+  function temperature(temp) {
     if (temperatureUnit == 0) {
       return temp;
     } else {
@@ -62,20 +62,20 @@ Item {
   property string fiveIcon: assignIcon(obtain(forecastWeather, 5), true)
   property string sixIcon: assignIcon(obtain(forecastWeather, 6), true)
   property string sevenIcon: assignIcon(obtain(forecastWeather, 7), true)
-  property int oneMax: fahrenheit(obtain(forecastWeather, 8))
-  property int twoMax: fahrenheit(obtain(forecastWeather, 9))
-  property int threeMax: fahrenheit(obtain(forecastWeather, 10))
-  property int fourMax: fahrenheit(obtain(forecastWeather, 11))
-  property int fiveMax: fahrenheit(obtain(forecastWeather, 12))
-  property int sixMax: fahrenheit(obtain(forecastWeather, 13))
-  property int sevenMax: fahrenheit(obtain(forecastWeather, 14))
-  property int oneMin: fahrenheit(obtain(forecastWeather, 15))
-  property int twoMin: fahrenheit(obtain(forecastWeather, 16))
-  property int threeMin: fahrenheit(obtain(forecastWeather, 17))
-  property int fourMin: fahrenheit(obtain(forecastWeather, 18))
-  property int fiveMin: fahrenheit(obtain(forecastWeather, 19))
-  property int sixMin: fahrenheit(obtain(forecastWeather, 20))
-  property int sevenMin: fahrenheit(obtain(forecastWeather, 21))
+  property int oneMax: temperature(obtain(forecastWeather, 8))
+  property int twoMax: temperature(obtain(forecastWeather, 9))
+  property int threeMax: temperature(obtain(forecastWeather, 10))
+  property int fourMax: temperature(obtain(forecastWeather, 11))
+  property int fiveMax: temperature(obtain(forecastWeather, 12))
+  property int sixMax: temperature(obtain(forecastWeather, 13))
+  property int sevenMax: temperature(obtain(forecastWeather, 14))
+  property int oneMin: temperature(obtain(forecastWeather, 15))
+  property int twoMin: temperature(obtain(forecastWeather, 16))
+  property int threeMin: temperature(obtain(forecastWeather, 17))
+  property int fourMin: temperature(obtain(forecastWeather, 18))
+  property int fiveMin: temperature(obtain(forecastWeather, 19))
+  property int sixMin: temperature(obtain(forecastWeather, 20))
+  property int sevenMin: temperature(obtain(forecastWeather, 21))
 
   property string day: (Qt.formatDateTime(new Date(), "yyyy-MM-dd"))
   property string therday: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
@@ -83,21 +83,21 @@ Item {
   property string finDay: Qt.formatDateTime(new Date(new Date().getTime() + (1 * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
 
   property int numberOfDays: 6
-  property string currentTemperature: dataweather !== "0" ? fahrenheit(obtain(dataweather, 1)) : "?"
+  property string currentTemperature: dataweather !== "0" ? temperature(obtain(dataweather, 1)) : "?"
   property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
   property string codeweather: obtain(dataweather, 4)
   property string codeweatherTomorrow: obtain(forecastWeather, 2)
   property string codeweatherDayAftertomorrow: obtain(forecastWeather, 3)
   property string codeweatherTwoDaysAfterTomorrow: obtain(forecastWeather, 4)
-  property string minweatherCurrent: fahrenheit(obtain(dataweather, 2))
-  property string maxweatherCurrent: fahrenheit(obtain(dataweather, 3))
+  property string minweatherCurrent: temperature(obtain(dataweather, 2))
+  property string maxweatherCurrent: temperature(obtain(dataweather, 3))
 
   property var tempHours: [
-    fahrenheit(obtain(dataweather, 9)),
-    fahrenheit(obtain(dataweather, 10)),
-    fahrenheit(obtain(dataweather, 11)),
-    fahrenheit(obtain(dataweather, 12)),
-    fahrenheit(obtain(dataweather, 13))
+    temperature(obtain(dataweather, 9)),
+    temperature(obtain(dataweather, 10)),
+    temperature(obtain(dataweather, 11)),
+    temperature(obtain(dataweather, 12)),
+    temperature(obtain(dataweather, 13))
   ]
 
 
