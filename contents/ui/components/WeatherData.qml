@@ -24,6 +24,10 @@ Item {
     }
   }
 
+  property color dayColor: "#3DAAE4"
+  property color nightColor: "#0D1B2A"
+  property color leftPanelColor: isDay ? dayColor : nightColor
+
   property bool isUpdate: false
   property string lastUpdate: "0"
   property int hoursC: 0
@@ -262,6 +266,10 @@ Item {
     // Update current weather icon using DayOrNight
     iconWeatherCurrent = asingicon(codeweather || 0, determinateDay.isDayForHour(currentHour));
 
+    // Update leftPanelColor based on current day/night
+    root.isDay = determinateDay.isDayForHour(currentHour); // update property
+    root.leftPanelColor = root.isDay ? root.dayColor : root.nightColor;
+
     // Update next 5 hourly forecast icons
     iconHours = [];
     for (let i = 0; i < 5; i++) {
@@ -420,38 +428,42 @@ Item {
   }
 
   Timer {
-    id: weatherupdate
-    interval: 900000
+    id: weatherUpdateTimer
     running: true
     repeat: true
+    interval: 0
+
     onTriggered: {
+      // Regular 15-minute background update
       isUpdate = true
       oldCompleteCoordinates = completeCoordinates
       getCoordinatesWithIp()
       determinateDay.update()
-      //updateWeather(1);
-      //veri.start()
+
+      // Hourly full refresh (exactly 1 second after the new hour)
+      const now = new Date()
+      const minutes = now.getMinutes()
+      const seconds = now.getSeconds()
+
+      // Run hourly refresh if within first few seconds of the new hour
+      if (minutes === 0 && seconds <= 2) {
+        updateWeather(1)
+        updateIcons()
+        determinateDay.update()
+        console.log("Hourly weather refresh triggered")
+      }
+
+      // Determine next trigger interval:
+      // if we’re inside the hour mark window, jump to next 15min slot,
+      // else maintain the 15min cycle
+      let nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 1)
+      let nextQuarter = new Date(now.getTime() + 15 * 60 * 1000)
+      interval = Math.min(nextHour - now, 15 * 60 * 1000)
+
+      start()
     }
   }
 
-  // Hourly on-the-dot weather fetch
-  Timer {
-    id: hourlyWeatherUpdate
-    running: true
-    repeat: true
-    interval: 0
-    onTriggered: {
-      updateWeather(1);           // fetch latest weather
-      determinateDay.update();    // recompute day/night
-      updateIcons();              // refresh all icons
-
-      // calculate milliseconds until 1 second after next hour
-      let now = new Date();
-      let nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 1, 0);
-      interval = nextHour - now;
-      start();
-    }
-  }
 
   Timer {
     id: nextEventTimer
