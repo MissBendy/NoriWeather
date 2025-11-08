@@ -1,4 +1,4 @@
-function obtenerCoordenadas(callback) {
+function obtainCoordinates(callback) {
     let url = "http://ip-api.com/json/?fields=lat,lon";
 
     let req = new XMLHttpRequest();
@@ -8,9 +8,9 @@ function obtenerCoordenadas(callback) {
         if (req.readyState === 4) {
             if (req.status === 200) {
                 try {
-                    let datos = JSON.parse(req.responseText);
-                    let latitud = datos.lat;
-                    let longitud = datos.lon;
+                    let data = JSON.parse(req.responseText);
+                    let latitud = data.lat;
+                    let longitud = data.lon;
                     let full = `${latitud}, ${longitud}`;
                     console.log(`Coordinates obtained: ${full}`);
                     callback(full); // Return full coordinates

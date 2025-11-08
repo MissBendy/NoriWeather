@@ -41,11 +41,11 @@ Item {
         Layout.fillWidth: true
 
         GridLayout{
-            id: firslayout
+            id: settingsGrid
             columns: 2
 
             Label {
-                id: refrestitle
+                id: useIPlocation
                 Layout.minimumWidth: root.width/2
                 text: i18n("Use geographical coordinates from the IP") + ":"
                 horizontalAlignment: Label.AlignRight
@@ -120,7 +120,7 @@ Item {
             ComboBox {
                 textRole: "text"
                 valueRole: "value"
-                id: positionComboBox
+                id: unitComboBox
                 model: [
                     {text: i18n("Celsius (°C)"), value: 0},
                     {text: i18n("Fahrenheit (°F)"), value: 1},

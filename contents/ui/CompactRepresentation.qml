@@ -23,7 +23,7 @@ Item {
     property bool activeweathershottext: heightH > 34
     property int fonssizes: Plasmoid.configuration.sizeFontConfig
     property int heightH: wrapper.height
-    property var widthWidget: activeweathershottext ? temOfCo.implicitWidth : temOfCo.implicitWidth + wrapper_weathertext.width
+    property var widthWidget: activeweathershottext ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
@@ -43,7 +43,7 @@ Item {
     }
     RowLayout {
         id: initial
-        width: icon.width + columntemandweathertext.width + icon.width * 0.3
+        width: icon.width + weatherInfoColumn.width + icon.width * 0.3
         height: parent.height
         spacing: icon.width / 5
         visible: !isVertical
@@ -57,20 +57,20 @@ Item {
             roundToIconSize: false
         }
         Column {
-            id: columntemandweathertext
+            id: weatherInfoColumn
             width: widthWidget
-            height: temOfCo.implicitHeight
+            height: temperatureRow.implicitHeight
             anchors.verticalCenter: parent.verticalCenter
             Row {
-                id: temOfCo
-                width: textGrados.implicitWidth + subtextGrados.implicitWidth
-                height: textGrados.implicitHeight
+                id: temperatureRow
+                width: tempValue.implicitWidth + tempUnit.implicitWidth
+                height: tempValue.implicitHeight
                 anchors.verticalCenter: undefanchors
 
                 Label {
-                    id: textGrados
+                    id: tempValue
                     height: parent.height
-                    width: parent.width - subtextGrados.implicitWidth
+                    width: parent.width - tempUnit.implicitWidth
                     text: wrapper.currentTemp
                     font.bold: boldfonts
                     font.pixelSize: fonssizes
@@ -79,9 +79,9 @@ Item {
                     verticalAlignment: Text.AlignVCenter
                 }
                 Label {
-                    id: subtextGrados
+                    id: tempUnit
                     height: parent.height
-                    width: parent.width - textGrados.implicitWidth
+                    width: parent.width - tempValue.implicitWidth
                     text: (wrapper.unitsTemperature === "0") ? "°C" : "°F"
                     horizontalAlignment: Text.AlignLeft
                     font.bold: boldfonts
@@ -108,7 +108,7 @@ Item {
     ColumnLayout {
         id: wrapper_vertical
         width: root.width
-        height: icon_vertical.height +  textGrados_vertical.implicitHeight
+        height: icon_vertical.height +  tempValue_vertical.implicitHeight
         spacing: 2
         visible: isVertical
         Kirigami.Icon {
@@ -121,13 +121,13 @@ Item {
             roundToIconSize: false
         }
         Row {
-            id: temOfCo_vertical
-            width: textGrados_vertical.implicitWidth + subtextGrados_vertical.implicitWidth
-            height: textGrados_vertical.implicitHeight
+            id: temperatureRow_vertical
+            width: tempValue_vertical.implicitWidth + tempUnit_vertical.implicitWidth
+            height: tempValue_vertical.implicitHeight
             Layout.alignment: Qt.AlignHCenter
 
             Label {
-                id: textGrados_vertical
+                id: tempValue_vertical
                 height: parent.height
                 text: wrapper.currentTemp
                 font.bold: boldfonts
@@ -136,7 +136,7 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
             }
             Label {
-                id: subtextGrados_vertical
+                id: tempUnit_vertical
                 height: parent.height
                 text: (wrapper.unitsTemperature === "0") ? " °C" : " °F"
                 font.bold: boldfonts

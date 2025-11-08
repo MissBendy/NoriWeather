@@ -1,6 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import "../js/traductor.js" as Traduc
+import "../js/translator.js" as Translate
 import "../js/GetInfoApi.js" as GetInfoApi
 import "../js/geoCoordinates.js" as GeoCoordinates
 import "../js/GetCity.js" as GetCity
@@ -11,9 +11,9 @@ Item {
   signal dataChanged // Define the signal here
   signal simpleDataReady // Define the signal here
 
-  function obtener(texto, indice) {
-    var palabras = texto.split(/\s+/); // Divide the text into words using space as a separator
-    return palabras[indice - 1]; // The index is -1 because indices start from 0 in JavaScript
+  function obtain(text, index) {
+    var words = text.split(/\s+/); // Divide the text into words using space as a separator
+    return words[index - 1]; // The index is -1 because indexes start from 0 in JavaScript
   }
 
   function fahrenheit(temp) {
@@ -50,32 +50,32 @@ Item {
 
   property int currentTime: Number(Qt.formatDateTime(new Date(), "h"))
 
-  property string datosweather: "0"
+  property string dataweather: "0"
   property string forecastWeather: "0"
-  property string observer: datosweather + forecastWeather
+  property string observer: dataweather + forecastWeather
   property int retrysCity: 0
 
-  property string oneIcon: asingicon(obtener(forecastWeather, 1), true)
-  property string twoIcon: asingicon(obtener(forecastWeather, 2), true)
-  property string threeIcon: asingicon(obtener(forecastWeather, 3), true)
-  property string fourIcon: asingicon(obtener(forecastWeather, 4), true)
-  property string fiveIcon: asingicon(obtener(forecastWeather, 5), true)
-  property string sixIcon: asingicon(obtener(forecastWeather, 6), true)
-  property string sevenIcon: asingicon(obtener(forecastWeather, 7), true)
-  property int oneMax: fahrenheit(obtener(forecastWeather, 8))
-  property int twoMax: fahrenheit(obtener(forecastWeather, 9))
-  property int threeMax: fahrenheit(obtener(forecastWeather, 10))
-  property int fourMax: fahrenheit(obtener(forecastWeather, 11))
-  property int fiveMax: fahrenheit(obtener(forecastWeather, 12))
-  property int sixMax: fahrenheit(obtener(forecastWeather, 13))
-  property int sevenMax: fahrenheit(obtener(forecastWeather, 14))
-  property int oneMin: fahrenheit(obtener(forecastWeather, 15))
-  property int twoMin: fahrenheit(obtener(forecastWeather, 16))
-  property int threeMin: fahrenheit(obtener(forecastWeather, 17))
-  property int fourMin: fahrenheit(obtener(forecastWeather, 18))
-  property int fiveMin: fahrenheit(obtener(forecastWeather, 19))
-  property int sixMin: fahrenheit(obtener(forecastWeather, 20))
-  property int sevenMin: fahrenheit(obtener(forecastWeather, 21))
+  property string oneIcon: assignIcon(obtain(forecastWeather, 1), true)
+  property string twoIcon: assignIcon(obtain(forecastWeather, 2), true)
+  property string threeIcon: assignIcon(obtain(forecastWeather, 3), true)
+  property string fourIcon: assignIcon(obtain(forecastWeather, 4), true)
+  property string fiveIcon: assignIcon(obtain(forecastWeather, 5), true)
+  property string sixIcon: assignIcon(obtain(forecastWeather, 6), true)
+  property string sevenIcon: assignIcon(obtain(forecastWeather, 7), true)
+  property int oneMax: fahrenheit(obtain(forecastWeather, 8))
+  property int twoMax: fahrenheit(obtain(forecastWeather, 9))
+  property int threeMax: fahrenheit(obtain(forecastWeather, 10))
+  property int fourMax: fahrenheit(obtain(forecastWeather, 11))
+  property int fiveMax: fahrenheit(obtain(forecastWeather, 12))
+  property int sixMax: fahrenheit(obtain(forecastWeather, 13))
+  property int sevenMax: fahrenheit(obtain(forecastWeather, 14))
+  property int oneMin: fahrenheit(obtain(forecastWeather, 15))
+  property int twoMin: fahrenheit(obtain(forecastWeather, 16))
+  property int threeMin: fahrenheit(obtain(forecastWeather, 17))
+  property int fourMin: fahrenheit(obtain(forecastWeather, 18))
+  property int fiveMin: fahrenheit(obtain(forecastWeather, 19))
+  property int sixMin: fahrenheit(obtain(forecastWeather, 20))
+  property int sevenMin: fahrenheit(obtain(forecastWeather, 21))
 
   property string day: (Qt.formatDateTime(new Date(), "yyyy-MM-dd"))
   property string therday: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
@@ -83,21 +83,21 @@ Item {
   property string finDay: Qt.formatDateTime(new Date(new Date().getTime() + (1 * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
 
   property int numberOfDays: 6
-  property string currentTemperature: datosweather !== "0" ? fahrenheit(obtener(datosweather, 1)) : "?"
-  property string codeleng: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
-  property string codeweather: obtener(datosweather, 4)
-  property string codeweatherTomorrow: obtener(forecastWeather, 2)
-  property string codeweatherDayAftertomorrow: obtener(forecastWeather, 3)
-  property string codeweatherTwoDaysAfterTomorrow: obtener(forecastWeather, 4)
-  property string minweatherCurrent: fahrenheit(obtener(datosweather, 2))
-  property string maxweatherCurrent: fahrenheit(obtener(datosweather, 3))
+  property string currentTemperature: dataweather !== "0" ? fahrenheit(obtain(dataweather, 1)) : "?"
+  property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
+  property string codeweather: obtain(dataweather, 4)
+  property string codeweatherTomorrow: obtain(forecastWeather, 2)
+  property string codeweatherDayAftertomorrow: obtain(forecastWeather, 3)
+  property string codeweatherTwoDaysAfterTomorrow: obtain(forecastWeather, 4)
+  property string minweatherCurrent: fahrenheit(obtain(dataweather, 2))
+  property string maxweatherCurrent: fahrenheit(obtain(dataweather, 3))
 
   property var tempHours: [
-    fahrenheit(obtener(datosweather, 9)),
-    fahrenheit(obtener(datosweather, 10)),
-    fahrenheit(obtener(datosweather, 11)),
-    fahrenheit(obtener(datosweather, 12)),
-    fahrenheit(obtener(datosweather, 13))
+    fahrenheit(obtain(dataweather, 9)),
+    fahrenheit(obtain(dataweather, 10)),
+    fahrenheit(obtain(dataweather, 11)),
+    fahrenheit(obtain(dataweather, 12)),
+    fahrenheit(obtain(dataweather, 13))
   ]
 
 
@@ -109,22 +109,22 @@ Item {
   property string minweatherTwoDaysAfterTomorrow: fourMin
   property string maxweatherTwoDaysAfterTomorrow: fourMax
   property string iconWeatherCurrent
-  property string uvindex: uvIndexLevelAssignment(obtener(datosweather, 7))
-  property string windSpeed: obtener(datosweather, 6)
+  property string uvindex: uvIndexLevelAssignment(obtain(dataweather, 7))
+  property string windSpeed: obtain(dataweather, 6)
 
   property string weatherLongtext: i18n(textWeather(codeweather))
   property string weatherShottext: i18n(shortTextWeather(codeweather))
 
-  property string probabilidadDeLLuvia: obtener(datosweather, 5)
-  property string textProbability: Traduc.rainProbabilityText(codeleng)
+  property string probabilidadDeLLuvia: obtain(dataweather, 5)
+  property string textProbability: Translate.rainProbabilityText(languageCode)
 
   property string completeCoordinates: ""
   property string oldCompleteCoordinates: "1"
   property string latitudeIP: completeCoordinates.substring(0, (completeCoordinates.indexOf(' ')) - 1)
   property string longitudIP: completeCoordinates.substring(completeCoordinates.indexOf(' ') + 1)
 
-  property string uvtext: Traduc.uvRadiationText(codeleng)
-  property string windSpeedText: Traduc.windSpeedText(codeleng)
+  property string uvtext: Translate.uvRadiationText(languageCode)
+  property string windSpeedText: Translate.windSpeedText(languageCode)
   property bool isDay: determinateDay.isday
   property string city: "unk"
   property string prefixIcon: determinateDay.isDayForHour(new Date().getHours()) ? "" : "-night"
@@ -155,17 +155,17 @@ Item {
   }
 
   // UV index helper
-  function uvIndexLevelAssignment(nivel) {
-    if (nivel < 3) return nivel + " " + Traduc.lavelUV(codeleng, 0);
-    if (nivel < 6) return nivel + " " + Traduc.lavelUV(codeleng, 1);
-    if (nivel < 8) return nivel + " " + Traduc.lavelUV(codeleng, 2);
-    if (nivel < 11) return nivel + " " + Traduc.lavelUV(codeleng, 3);
-    return nivel + " " + Traduc.lavelUV(codeleng, 4);
+  function uvIndexLevelAssignment(level) {
+    if (level < 3) return level + " " + Translate.levelUV(languageCode, 0);
+    if (level < 6) return level + " " + Translate.levelUV(languageCode, 1);
+    if (level < 8) return level + " " + Translate.levelUV(languageCode, 2);
+    if (level < 11) return level + " " + Translate.levelUV(languageCode, 3);
+    return level + " " + Translate.levelUV(languageCode, 4);
   }
 
   // Fetch coordinates via IP
   function getCoordinatesWithIp() {
-    GeoCoordinates.obtenerCoordenadas(function(result) {
+    GeoCoordinates.obtainCoordinates(function(result) {
       completeCoordinates = result;
       retryCoordinate.start();
     });
@@ -189,7 +189,7 @@ Item {
       console.error("Invalid coordinates for city request");
       return;
     }
-    GetCity.getNameCity(latitude, longitud, codeleng, function(result) {
+    GetCity.getNameCity(latitude, longitud, languageCode, function(result) {
       city = result;
       retrycity.start();
     });
@@ -197,9 +197,9 @@ Item {
 
   // Weather API
   function getWeatherApi() {
-    GetInfoApi.obtenerDatosClimaticos(latitude, longitud, day, finDay, currentTime, function(result) {
+    GetInfoApi.getWeatherData(latitude, longitud, day, finDay, currentTime, function(result) {
       if (isUpdate) newValuesWeather = result;
-      else datosweather = result;
+      else dataweather = result;
 
       updateIcons(); // <-- refresh immediately, no delay
       getForecastWeather();
@@ -216,7 +216,7 @@ Item {
   }
 
   // Icon assignment
-  function asingicon(code, isDay = null) {
+  function assignIcon(code, isDay = null) {
     const wmocodes = {
       0: "clear",
       1: "few-clouds",
@@ -254,9 +254,9 @@ Item {
 
   // Update icons
   function updateIcons() {
-    function safeObtener(data, index) {
+    function safeobtain(data, index) {
       if (!data || data === "0") return 0;
-      let value = obtener(data, index);
+      let value = obtain(data, index);
       return value !== undefined ? value : 0;
     }
 
@@ -264,7 +264,7 @@ Item {
     const currentHour = now.getHours();
 
     // Update current weather icon using DayOrNight
-    iconWeatherCurrent = asingicon(codeweather || 0, determinateDay.isDayForHour(currentHour));
+    iconWeatherCurrent = assignIcon(codeweather || 0, determinateDay.isDayForHour(currentHour));
 
     // Update leftPanelColor based on current day/night
     root.isDay = determinateDay.isDayForHour(currentHour); // update property
@@ -276,8 +276,8 @@ Item {
       const forecastTime = new Date(now.getTime());
       forecastTime.setHours(currentHour + i + 1, 0, 0, 0); // next hours
       const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
-      const code = safeObtener(datosweather, 14 + i); // adjust index if necessary
-      iconHours.push(asingicon(code, isDayAtTime) || "weather-unknown");
+      const code = safeobtain(dataweather, 14 + i); // adjust index if necessary
+      iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
     }
   }
 
@@ -379,7 +379,7 @@ Item {
 
   onNewValuesForeWeatherChanged: {
     if (newValuesForeWeather.length > 3) {
-      datosweather = newValuesWeather;
+      dataweather = newValuesWeather;
       forecastWeather = newValuesForeWeather;
       newValuesWeather = "0";
       newValuesForeWeather= "0";
@@ -421,7 +421,7 @@ Item {
     running: false
     repeat: false
     onTriggered: {
-      if (datosweather === "0") {
+      if (dataweather === "0") {
         getWeatherApi();
       }
     }
