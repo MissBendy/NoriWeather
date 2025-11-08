@@ -5,7 +5,6 @@ Item {
     property string longitud
     readonly property bool fullCoordinates: latitud !== "" && longitud !== ""
 
-    // Will hold sunrise/sunset in minutes
     property int sunrise: 0
     property int sunset: 0
     property bool isday: true
@@ -14,35 +13,51 @@ Item {
 
     signal update
 
+    // -------------------
+    // Cache
+    // -------------------
+    property string cacheDate: ""
+    property int cacheSunrise: 0
+    property int cacheSunset: 0
+    property string cacheLat: ""
+    property string cacheLng: ""
+    property var lastFetchTime: new Date(0)  // track last fetch timestamp
+
     Timer {
         id: delayFetchTimer
         interval: 50
         repeat: false
         onTriggered: {
-            if (fullCoordinates) fetchSunData(apiUrlFinal)
+            if (fullCoordinates) fetchSunData()
         }
     }
 
     Timer {
-        id: retryUpdate
-        interval: 12000
+        id: twoHourTimer
+        interval: 2 * 60 * 60 * 1000  // 2 hours in milliseconds
         running: true
         repeat: true
-        onTriggered: fetchSunData(apiUrlFinal)
+        onTriggered: fetchSunData
     }
 
     function minutesOfDayLocal(dateStr) {
         var d = new Date(dateStr)
-        return d.getHours() * 60 + d.getMinutes()  // local timezone
+        return d.getHours() * 60 + d.getMinutes()
     }
 
-    function fetchSunData(url) {
-        retryUpdate.stop()
+    function fetchSunData() {
         var now = new Date()
-        var localMinutesNow = now.getHours() * 60 + now.getMinutes()
+        // Use cache if same location and same day, AND last fetch less than 2 hours ago
+        if (cacheLat === latitud && cacheLng === longitud && (now - lastFetchTime) < 2*60*60*1000) {
+            sunrise = cacheSunrise
+            sunset  = cacheSunset
+            updateDayStatus()
+            console.log("Using cached sunrise/sunset:", sunrise, sunset)
+            return
+        }
 
         var xhr = new XMLHttpRequest()
-        xhr.open("GET", url, true)
+        xhr.open("GET", apiUrlFinal, true)
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText)
@@ -52,14 +67,15 @@ Item {
 
                     if (sunset < sunrise) sunset += 1440
 
-                        var adjustedNow = localMinutesNow
-                        if (localMinutesNow < sunrise && now.getHours() < 3) adjustedNow += 1440
+                        // Store in cache
+                        cacheLat = latitud
+                        cacheLng = longitud
+                        cacheSunrise = sunrise
+                        cacheSunset = sunset
+                        lastFetchTime = new Date()
 
-                            isday = adjustedNow >= sunrise && adjustedNow < sunset
-                            console.log("Local time minutes:", adjustedNow,
-                                        "Sunrise:", sunrise,
-                                        "Sunset:", sunset,
-                                        "isDay:", isday)
+                        updateDayStatus()
+                        console.log("Fetched sunrise/sunset:", sunrise, sunset)
                 } else {
                     console.log("Sun API error:", response.status)
                 }
@@ -68,9 +84,16 @@ Item {
         xhr.send()
     }
 
+    function updateDayStatus() {
+        var now = new Date()
+        var localMinutesNow = now.getHours() * 60 + now.getMinutes()
+        var adjustedNow = localMinutesNow
+        if (localMinutesNow < sunrise && now.getHours() < 3) adjustedNow += 1440
+            isday = adjustedNow >= sunrise && adjustedNow < sunset
+    }
+
     function isDayForHour(hour) {
-        // hour in 0..23
-        if (sunrise === 0 && sunset === 0) return true  // fallback if data not loaded
+        if (sunrise === 0 && sunset === 0) return true
             var minutes = hour * 60
             var adjSunset = sunset
             if (sunset < sunrise) adjSunset += 1440
@@ -79,9 +102,7 @@ Item {
 
     onLatitudChanged: delayFetchTimer.restart()
     onLongitudChanged: delayFetchTimer.restart()
-
     onUpdate: {
-        if (fullCoordinates) fetchSunData(apiUrlFinal)
-            else retryUpdate.start()
+        if (fullCoordinates) fetchSunData()
     }
 }

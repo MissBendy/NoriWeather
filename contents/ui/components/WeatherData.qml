@@ -78,12 +78,12 @@ Item {
   property int sevenMin: temperature(obtain(forecastWeather, 21))
 
   property string day: (Qt.formatDateTime(new Date(), "yyyy-MM-dd"))
-  property string therday: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
+  property string targetDay: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
 
-  property string finDay: Qt.formatDateTime(new Date(new Date().getTime() + (1 * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
+  property string nextDay: Qt.formatDateTime(new Date(new Date().getTime() + (1 * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
 
   property int numberOfDays: 6
-  property string currentTemperature: dataweather !== "0" ? temperature(obtain(dataweather, 1)) : "?"
+  property string currentTemperature: "?"
   property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
   property string codeweather: obtain(dataweather, 4)
   property string codeweatherTomorrow: obtain(forecastWeather, 2)
@@ -197,7 +197,7 @@ Item {
 
   // Weather API
   function getWeatherApi() {
-    GetInfoApi.getWeatherData(latitude, longitud, day, finDay, currentTime, function(result) {
+    GetInfoApi.getWeatherData(latitude, longitud, day, nextDay, currentTime, function(result) {
       if (isUpdate) newValuesWeather = result;
       else dataweather = result;
 
@@ -209,7 +209,7 @@ Item {
 
   // Forecast
   function getForecastWeather() {
-    GetModelWeather.GetForecastWeather(latitude, longitud, day, therday, function(result) {
+    GetModelWeather.GetForecastWeather(latitude, longitud, day, targetDay, function(result) {
       if (isUpdate) newValuesForeWeather = result;
       else forecastWeather = result;
     });
@@ -279,8 +279,12 @@ Item {
       const code = safeobtain(dataweather, 14 + i); // adjust index if necessary
       iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
     }
-  }
 
+    // Update current temperature when icons refresh
+    if (dataweather && dataweather !== "0") {
+      currentTemperature = temperature(obtain(dataweather, 1));
+    }
+  }
 
 
   function textWeather(x) {
@@ -431,90 +435,65 @@ Item {
     id: weatherUpdateTimer
     running: true
     repeat: true
-    interval: 0
+    interval: 1000 // check every second
+
+    property int lastFrequentSecond: -1 // track last quick refresh
+    property bool topOfHourDone: false // track hourly refresh
 
     onTriggered: {
-      // Regular 15-minute background update
-      isUpdate = true
-      oldCompleteCoordinates = completeCoordinates
-      getCoordinatesWithIp()
-      determinateDay.update()
-
-      // Hourly full refresh (exactly 1 second after the new hour)
       const now = new Date()
       const minutes = now.getMinutes()
       const seconds = now.getSeconds()
 
-      // Run hourly refresh if within first few seconds of the new hour
+      // -----------------------------
+      // Top-of-hour full refresh
+      // -----------------------------
       if (minutes === 0 && seconds <= 2) {
-        updateWeather(1)
-        updateIcons()
+        if (!topOfHourDone) {
+          console.log("Top-of-hour full refresh triggered")
+          updateWeather(1)        // full refresh including coordinate logic
+          updateIcons()           // refresh all icons & current temp
+          determinateDay.update() // update day/night status
+          topOfHourDone = true
+          lastFrequentSecond = seconds // prevent quick refresh this second
+        }
+      } else {
+        topOfHourDone = false // reset for next hour
+      }
+
+      // -----------------------------
+      // Frequent 30-second refresh
+      // -----------------------------
+      if ((seconds % 30 === 0) && seconds !== lastFrequentSecond && !topOfHourDone) {
+        lastFrequentSecond = seconds
+        updateWeather(2)        // quick refresh
+        updateIcons()           // refresh icons & current temp
+        determinateDay.update() // update day/night status
+      }
+
+      // -----------------------------
+      // Optional: coordinate check
+      // -----------------------------
+      if (latitude && longitud && latitude !== "0" && longitud !== "0") {
+        // coordinates valid: update city if needed
+        if (city === "unk") getCityFunction()
+      } else {
+        // coordinates invalid: retry
+        retryCoordinate.start()
+      }
+
+      // -----------------------------
+      // Sunrise/sunset icon update
+      // -----------------------------
+      const nowTime = now.getTime()
+      const nextSunEvent = (root.isDay ? sunsetTime : sunriseTime)
+      if (Math.abs(nextSunEvent - nowTime) <= 1000) { // within 1 second
         determinateDay.update()
-        console.log("Hourly weather refresh triggered")
-      }
-
-      // Determine next trigger interval:
-      // if we’re inside the hour mark window, jump to next 15min slot,
-      // else maintain the 15min cycle
-      let nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 1)
-      let nextQuarter = new Date(now.getTime() + 15 * 60 * 1000)
-      interval = Math.min(nextHour - now, 15 * 60 * 1000)
-
-      start()
-    }
-  }
-
-
-  Timer {
-    id: nextEventTimer
-    running: false
-    repeat: false
-    onTriggered: {
-      determinateDay.update();  // recompute isDay
-      updateIcons();            // refresh current icon at sunrise/sunset
-    }
-  }
-
-  // Timer to check hour rollover
-  Timer {
-    id: hourlyIconRefresh
-    interval: 1000 // check every 10 seconds
-    running: true
-    repeat: true
-    property int lastHour: new Date().getHours()
-    onTriggered: {
-      const currentHour = new Date().getHours();
-      if (currentHour !== lastHour) {
-        lastHour = currentHour;
-        // recompute day/night and icons
-        determinateDay.update();
-        Qt.callLater(() => updateIcons()); // ensures DayOrNight is ready
+        updateIcons()
       }
     }
   }
 
-  Timer {
-    id: observateHours
-    interval: 1000
-    running: true
-    repeat: true
-    onTriggered: {
-      hoursC = Qt.formatDateTime(new Date(), "h")
-    }
-  }
-
-  Timer {
-    id: veri
-    interval: 4000
-    running: false
-    repeat: false
-    onTriggered: {
-      //newValuesWeather = "0"
-     if (oldCompleteCoordinates === completeCoordinates) {
-       updateWeather(2)
-    }
-    }
-  }
 
 
   onUseCoordinatesIpChanged: {

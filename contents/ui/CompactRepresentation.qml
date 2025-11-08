@@ -72,8 +72,7 @@ Item {
                     height: parent.height
                     width: parent.width - tempUnit.implicitWidth
                     text: wrapper.currentTemp
-                    font.bold: boldfonts
-                    font.pixelSize: fonssizes
+                    font.weight: boldconditions ? Font.DemiBold : Font.Medium
                     color: PlasmaCore.Theme.textColor
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
@@ -84,7 +83,7 @@ Item {
                     width: parent.width - tempValue.implicitWidth
                     text: (wrapper.unitsTemperature === "0") ? "°C" : "°F"
                     horizontalAlignment: Text.AlignLeft
-                    font.bold: boldfonts
+                    font.weight: boldconditions ? Font.DemiBold : Font.Medium
                     font.pixelSize: fonssizes
                     color: PlasmaCore.Theme.textColor
                     verticalAlignment: Text.AlignVCenter
@@ -99,7 +98,7 @@ Item {
                     id: shortweathertext
                     text: wrapper.weather
                     font.pixelSize: fonssizes
-                    font.bold: boldconditions
+                    font.weight: boldconditions ? Font.DemiBold : Font.Medium
                     verticalAlignment: Text.AlignVCenter
                 }
             }
