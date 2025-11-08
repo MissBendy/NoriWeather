@@ -8,7 +8,7 @@ Provides hourly and daily weather forecasts with:
 - Adjustable temperature units (°C/°F)
 - Customizable font size
 - Option to use geographical coordinates from IP or manual input
-- Weather data fetched via the [Open-Meteo API](https://open-meteo.com/)
+- Weather data fetched via the [Open-Meteo API](https://open-meteo.com/) with ECMWF IFS 0.25° model
 - Sunrise & sunset times fetched via the [Sunrise-Sunset API](https://sunrise-sunset.org/)
 - Automatic location detection via [IP-API](https://ip-api.com/)
 - City and address info fetched via [Nominatim](https://nominatim.openstreetmap.org/)
