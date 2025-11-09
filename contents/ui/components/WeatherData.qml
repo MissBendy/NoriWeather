@@ -35,7 +35,7 @@ Item {
   property int sunsetTime: 0
   property string newValuesWeather: "0"
   property string newValuesForeWeather: "0"
-  property bool active: plasmoid.configuration.weatheCardActive
+  property bool active: plasmoid.configuration.weatheCardActive !== undefined ? plasmoid.configuration.weatheCardActive : false
   property bool isInExecution:  false
   property string useCoordinatesIp: plasmoid.configuration.coordinatesIP
   property string latitudeC: plasmoid.configuration.manualLatitude
@@ -55,27 +55,27 @@ Item {
   property string observer: dataweather + forecastWeather
   property int retrysCity: 0
 
-  property string oneIcon: assignIcon(obtain(forecastWeather, 1), true)
-  property string twoIcon: assignIcon(obtain(forecastWeather, 2), true)
-  property string threeIcon: assignIcon(obtain(forecastWeather, 3), true)
-  property string fourIcon: assignIcon(obtain(forecastWeather, 4), true)
-  property string fiveIcon: assignIcon(obtain(forecastWeather, 5), true)
-  property string sixIcon: assignIcon(obtain(forecastWeather, 6), true)
-  property string sevenIcon: assignIcon(obtain(forecastWeather, 7), true)
-  property int oneMax: temperature(obtain(forecastWeather, 8))
-  property int twoMax: temperature(obtain(forecastWeather, 9))
-  property int threeMax: temperature(obtain(forecastWeather, 10))
-  property int fourMax: temperature(obtain(forecastWeather, 11))
-  property int fiveMax: temperature(obtain(forecastWeather, 12))
-  property int sixMax: temperature(obtain(forecastWeather, 13))
-  property int sevenMax: temperature(obtain(forecastWeather, 14))
-  property int oneMin: temperature(obtain(forecastWeather, 15))
-  property int twoMin: temperature(obtain(forecastWeather, 16))
-  property int threeMin: temperature(obtain(forecastWeather, 17))
-  property int fourMin: temperature(obtain(forecastWeather, 18))
-  property int fiveMin: temperature(obtain(forecastWeather, 19))
-  property int sixMin: temperature(obtain(forecastWeather, 20))
-  property int sevenMin: temperature(obtain(forecastWeather, 21))
+  property string oneIcon: assignIcon(safeString(forecastWeather, 1), true)
+  property string twoIcon: assignIcon(safeString(forecastWeather, 2), true)
+  property string threeIcon: assignIcon(safeString(forecastWeather, 3), true)
+  property string fourIcon: assignIcon(safeString(forecastWeather, 4), true)
+  property string fiveIcon: assignIcon(safeString(forecastWeather, 5), true)
+  property string sixIcon: assignIcon(safeString(forecastWeather, 6), true)
+  property string sevenIcon: assignIcon(safeString(forecastWeather, 7), true)
+  property int oneMax: temperature(safeInt(forecastWeather, 8))
+  property int twoMax: temperature(safeInt(forecastWeather, 9))
+  property int threeMax: temperature(safeInt(forecastWeather, 10))
+  property int fourMax: temperature(safeInt(forecastWeather, 11))
+  property int fiveMax: temperature(safeInt(forecastWeather, 12))
+  property int sixMax: temperature(safeInt(forecastWeather, 13))
+  property int sevenMax: temperature(safeInt(forecastWeather, 14))
+  property int oneMin: temperature(safeInt(forecastWeather, 15))
+  property int twoMin: temperature(safeInt(forecastWeather, 16))
+  property int threeMin: temperature(safeInt(forecastWeather, 17))
+  property int fourMin: temperature(safeInt(forecastWeather, 18))
+  property int fiveMin: temperature(safeInt(forecastWeather, 19))
+  property int sixMin: temperature(safeInt(forecastWeather, 20))
+  property int sevenMin: temperature(safeInt(forecastWeather, 21))
 
   property string day: (Qt.formatDateTime(new Date(), "yyyy-MM-dd"))
   property string targetDay: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
@@ -85,19 +85,19 @@ Item {
   property int numberOfDays: 6
   property string currentTemperature: "?"
   property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
-  property string codeweather: obtain(dataweather, 4)
-  property string codeweatherTomorrow: obtain(forecastWeather, 2)
-  property string codeweatherDayAftertomorrow: obtain(forecastWeather, 3)
-  property string codeweatherTwoDaysAfterTomorrow: obtain(forecastWeather, 4)
-  property string minweatherCurrent: temperature(obtain(dataweather, 2))
-  property string maxweatherCurrent: temperature(obtain(dataweather, 3))
+  property string codeweather: safeString(dataweather, 4)
+  property string codeweatherTomorrow: safeString(forecastWeather, 2)
+  property string codeweatherDayAftertomorrow: safeString(forecastWeather, 3)
+  property string codeweatherTwoDaysAfterTomorrow: safeString(forecastWeather, 4)
+  property string minweatherCurrent: temperature(safeString(dataweather, 2))
+  property string maxweatherCurrent: temperature(safeString(dataweather, 3))
 
   property var tempHours: [
-    temperature(obtain(dataweather, 9)),
-    temperature(obtain(dataweather, 10)),
-    temperature(obtain(dataweather, 11)),
-    temperature(obtain(dataweather, 12)),
-    temperature(obtain(dataweather, 13))
+    temperature(safeInt(dataweather, 9)),
+    temperature(safeInt(dataweather, 10)),
+    temperature(safeInt(dataweather, 11)),
+    temperature(safeInt(dataweather, 12)),
+    temperature(safeInt(dataweather, 13))
   ]
 
 
@@ -110,12 +110,12 @@ Item {
   property string maxweatherTwoDaysAfterTomorrow: fourMax
   property string iconWeatherCurrent
   property string uvindex: uvIndexLevelAssignment(obtain(dataweather, 7))
-  property string windSpeed: obtain(dataweather, 6)
+  property string windSpeed: safeString(dataweather, 6)
 
   property string weatherLongtext: i18n(textWeather(codeweather))
   property string weatherShottext: i18n(shortTextWeather(codeweather))
 
-  property string probabilidadDeLLuvia: obtain(dataweather, 5)
+  property string probabilidadDeLLuvia: safeString(dataweather, 5)
   property string textProbability: Translate.rainProbabilityText(languageCode)
 
   property string completeCoordinates: ""
@@ -138,20 +138,6 @@ Item {
     id: determinateDay
     latitud: root.latitude
     longitud: root.longitud
-
-    onIsdayChanged: {
-      updateIcons(); // refresh current icon immediately
-
-      // Optionally refresh weather if needed
-      if (fullCoordinates) updateWeather(2);
-
-      // Schedule next update at sunrise or sunset
-      if (nextEventTimer.running) nextEventTimer.stop();
-      let now = new Date();
-      let nextEvent = isday ? new Date(sunsetTime) : new Date(sunriseTime);
-      if (nextEvent <= now) nextEvent = new Date(nextEvent.getTime() + 24*60*60*1000);
-      nextEventTimer.start(nextEvent - now);
-    }
   }
 
   // UV index helper
@@ -254,7 +240,7 @@ Item {
 
   // Update icons
   function updateIcons() {
-    function safeobtain(data, index) {
+    function safeString(data, index) {
       if (!data || data === "0") return 0;
       let value = obtain(data, index);
       return value !== undefined ? value : 0;
@@ -276,7 +262,7 @@ Item {
       const forecastTime = new Date(now.getTime());
       forecastTime.setHours(currentHour + i + 1, 0, 0, 0); // next hours
       const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
-      const code = safeobtain(dataweather, 14 + i); // adjust index if necessary
+      const code = safeString(dataweather, 14 + i); // adjust index if necessary
       iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
     }
 
@@ -284,6 +270,24 @@ Item {
     if (dataweather && dataweather !== "0") {
       currentTemperature = temperature(obtain(dataweather, 1));
     }
+  }
+
+  function safeString(data, index) {
+    if (!data || data === "0") return "0";
+    let value = obtain(data, index);
+    return value !== undefined ? value : "0";
+  }
+
+  function safeBool(data, index) {
+    if (!data || data === "0") return false;
+    let value = obtain(data, index);
+    return value !== undefined ? Boolean(value) : false;
+  }
+
+  function safeInt(data, index) {
+    if (!data || data === "0") return 0; // default integer
+    let value = obtain(data, index);
+    return value !== undefined ? Number(value) : 0;
   }
 
 
@@ -360,15 +364,13 @@ Item {
         } else {
           getWeatherApi()
           determinateDay.update()
-          updateIcons()
         }
       }
     }
-///
+
     if (x === 2) {
       getWeatherApi();
       determinateDay.update()
-      updateIcons()
     }
   }
 
@@ -387,7 +389,6 @@ Item {
       forecastWeather = newValuesForeWeather;
       newValuesWeather = "0";
       newValuesForeWeather= "0";
-      updateIcons()
     }
   }
 
@@ -433,67 +434,82 @@ Item {
 
   Timer {
     id: weatherUpdateTimer
-    running: true
+    running: false // start stopped
     repeat: true
     interval: 1000 // check every second
 
-    property int lastFrequentSecond: -1 // track last quick refresh
-    property bool topOfHourDone: false // track hourly refresh
+    property int lastFrequentSecond: -1
+    property int lastMinuteUpdated: -1
+    property int lastHourUpdated: -1
 
     onTriggered: {
       const now = new Date()
-      const minutes = now.getMinutes()
       const seconds = now.getSeconds()
+      const currentMinute = now.getMinutes()
+      const currentHour = now.getHours()
 
       // -----------------------------
-      // Top-of-hour full refresh
+      // 30-second refresh
       // -----------------------------
-      if (minutes === 0 && seconds <= 2) {
-        if (!topOfHourDone) {
-          console.log("Top-of-hour full refresh triggered")
-          updateWeather(1)        // full refresh including coordinate logic
-          updateIcons()           // refresh all icons & current temp
-          determinateDay.update() // update day/night status
-          topOfHourDone = true
-          lastFrequentSecond = seconds // prevent quick refresh this second
-        }
-      } else {
-        topOfHourDone = false // reset for next hour
-      }
-
-      // -----------------------------
-      // Frequent 30-second refresh
-      // -----------------------------
-      if ((seconds % 30 === 0) && seconds !== lastFrequentSecond && !topOfHourDone) {
+      if ((seconds % 30 === 0) && seconds !== lastFrequentSecond) {
         lastFrequentSecond = seconds
-        updateWeather(2)        // quick refresh
-        updateIcons()           // refresh icons & current temp
-        determinateDay.update() // update day/night status
-      }
-
-      // -----------------------------
-      // Optional: coordinate check
-      // -----------------------------
-      if (latitude && longitud && latitude !== "0" && longitud !== "0") {
-        // coordinates valid: update city if needed
-        if (city === "unk") getCityFunction()
-      } else {
-        // coordinates invalid: retry
-        retryCoordinate.start()
-      }
-
-      // -----------------------------
-      // Sunrise/sunset icon update
-      // -----------------------------
-      const nowTime = now.getTime()
-      const nextSunEvent = (root.isDay ? sunsetTime : sunriseTime)
-      if (Math.abs(nextSunEvent - nowTime) <= 1000) { // within 1 second
+        console.log("30-second refresh triggered")
+        updateWeather(2)
         determinateDay.update()
-        updateIcons()
+        if (dataweather && dataweather !== "0") {
+          currentTemperature = temperature(obtain(dataweather, 1))
+          console.log("Updated temperature:", currentTemperature)
+        }
+      }
+
+      // -----------------------------
+      // Current Day/Night icon update
+      // -----------------------------
+      if (currentMinute !== lastMinuteUpdated) {
+        lastMinuteUpdated = currentMinute
+
+        const isDayNow = determinateDay.isday
+        console.log("Checking day/night status:", isDayNow ? "Day" : "Night")
+
+        iconWeatherCurrent = assignIcon(codeweather || 0, isDayNow)
+        root.isDay = isDayNow
+        root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor
+
+        console.log("Updated current icon to:", iconWeatherCurrent)
+        console.log("Updated left panel to:", root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor")
+      }
+
+      // -----------------------------
+      // Update hourly forecast icons at top of the hour
+      // -----------------------------
+      if (currentHour !== lastHourUpdated) {
+        console.log("Updating hourly forecast icons:")
+        iconHours = []
+        for (let i = 0; i < 5; i++) {
+          const forecastTime = new Date(now.getTime())
+          forecastTime.setHours(currentHour + i + 1, 0, 0, 0)
+            const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours())
+            const code = safeString(dataweather, 14 + i)
+            iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown")
+        }
+
+        lastHourUpdated = currentHour
+
+        // Log each hourly icon individually
+        iconHours.forEach((icon, index) => {
+          console.log(`Hourly icon ${index + 1}:`, icon)
+        })
       }
     }
   }
 
+  // Start the timer once dataweather is ready
+  onDataweatherChanged: {
+    if (dataweather && dataweather !== "0" && !weatherUpdateTimer.running) {
+      console.log("dataweather ready, starting weather timer")
+      weatherUpdateTimer.start()
+    }
+  }
 
 
   onUseCoordinatesIpChanged: {

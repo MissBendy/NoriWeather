@@ -9,7 +9,12 @@ Item {
     property int sunset: 0
     property bool isday: true
 
-    property string apiUrlFinal: "https://api.sunrise-sunset.org/json?lat=" + latitud + "&lng=" + longitud + "&formatted=0"
+    // -------------------
+    // Time format
+    // -------------------
+    property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
+    property string sunriseText: minutesToTimeString(sunrise)
+    property string sunsetText: minutesToTimeString(sunset)
 
     signal update
 
@@ -21,7 +26,7 @@ Item {
     property int cacheSunset: 0
     property string cacheLat: ""
     property string cacheLng: ""
-    property var lastFetchTime: new Date(0)  // track last fetch timestamp
+    property var lastFetchTime: new Date(0)
 
     Timer {
         id: delayFetchTimer
@@ -34,54 +39,76 @@ Item {
 
     Timer {
         id: twoHourTimer
-        interval: 2 * 60 * 60 * 1000  // 2 hours in milliseconds
+        interval: 2 * 60 * 60 * 1000
         running: true
         repeat: true
         onTriggered: fetchSunData
     }
 
-    function minutesOfDayLocal(dateStr) {
-        var d = new Date(dateStr)
-        return d.getHours() * 60 + d.getMinutes()
+    // Convert UTC ISO string to local minutes since midnight
+    function minutesOfDayUTCtoLocal(dateStr) {
+        var d = new Date(dateStr)            // UTC
+        var minutesUTC = d.getUTCHours() * 60 + d.getUTCMinutes()
+        var offset = d.getTimezoneOffset()   // minutes behind UTC
+        var localMinutes = minutesUTC - offset
+        if (localMinutes < 0) localMinutes += 1440
+            if (localMinutes >= 1440) localMinutes -= 1440
+                return localMinutes
+    }
+
+    function apiUrl() {
+        var today = new Date().toISOString().slice(0, 10)
+        return "https://api.sunrise-sunset.org/json?lat=" + latitud +
+        "&lng=" + longitud +
+        "&date=" + today +
+        "&formatted=0" // UTC times
     }
 
     function fetchSunData() {
-        var now = new Date()
-        // Use cache if same location and same day, AND last fetch less than 2 hours ago
-        if (cacheLat === latitud && cacheLng === longitud && (now - lastFetchTime) < 2*60*60*1000) {
-            sunrise = cacheSunrise
-            sunset  = cacheSunset
-            updateDayStatus()
-            console.log("Using cached sunrise/sunset:", sunrise, sunset)
-            return
-        }
+        if (!fullCoordinates) return
 
-        var xhr = new XMLHttpRequest()
-        xhr.open("GET", apiUrlFinal, true)
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText)
-                if (response.status === "OK") {
-                    sunrise = minutesOfDayLocal(response.results.sunrise)
-                    sunset  = minutesOfDayLocal(response.results.sunset)
+            var now = new Date()
+            var todayStr = now.toISOString().slice(0,10)
 
-                    if (sunset < sunrise) sunset += 1440
+            if (cacheLat === latitud && cacheLng === longitud && cacheDate === todayStr && (now - lastFetchTime) < 2*60*60*1000) {
+                sunrise = cacheSunrise
+                sunset  = cacheSunset
+                updateDayStatus()
+                console.log("Using cached sunrise/sunset:", sunriseText, sunsetText)
+                return
+            }
 
-                        // Store in cache
-                        cacheLat = latitud
-                        cacheLng = longitud
-                        cacheSunrise = sunrise
-                        cacheSunset = sunset
-                        lastFetchTime = new Date()
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET", apiUrl(), true)
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText)
+                    if (response.status === "OK") {
+                        sunrise = minutesOfDayUTCtoLocal(response.results.sunrise)
+                        sunset  = minutesOfDayUTCtoLocal(response.results.sunset)
 
-                        updateDayStatus()
-                        console.log("Fetched sunrise/sunset:", sunrise, sunset)
-                } else {
-                    console.log("Sun API error:", response.status)
+                        // Handle sunsets past midnight
+                        if (sunset < sunrise) sunset += 1440
+
+                            // Store in cache
+                            cacheLat = latitud
+                            cacheLng = longitud
+                            cacheDate = todayStr
+                            cacheSunrise = sunrise
+                            cacheSunset = sunset
+                            lastFetchTime = new Date()
+
+                            updateDayStatus()
+                            console.log("Fetched sunrise/sunset:", sunriseText, sunsetText)
+                    } else {
+                        console.log("Sun API error:", response.status)
+                    }
                 }
             }
-        }
-        xhr.send()
+            xhr.onerror = function() {
+                console.log("Network error fetching sun data")
+            }
+            xhr.send()
     }
 
     function updateDayStatus() {
@@ -98,6 +125,28 @@ Item {
             var adjSunset = sunset
             if (sunset < sunrise) adjSunset += 1440
                 return minutes >= sunrise && minutes < adjSunset
+    }
+
+    function minutesToTimeString(minutes) {
+        var hours = Math.floor(minutes / 60)
+        var mins = minutes % 60
+
+        if (timeFormat === 12) {
+            var suffix = hours >= 12 ? "PM" : "AM"
+            var displayHour = hours % 12
+            if (displayHour === 0) displayHour = 12
+                return displayHour + ":" + (mins < 10 ? "0" + mins : mins) + " " + suffix
+        } else { // 24-hour
+            return (hours < 10 ? "0" + hours : hours) + ":" + (mins < 10 ? "0" + mins : mins)
+        }
+    }
+
+    // Update formatted strings when values or time format change
+    onSunriseChanged: sunriseText = minutesToTimeString(sunrise)
+    onSunsetChanged:  sunsetText  = minutesToTimeString(sunset)
+    onTimeFormatChanged: {
+        sunriseText = minutesToTimeString(sunrise)
+        sunsetText  = minutesToTimeString(sunset)
     }
 
     onLatitudChanged: delayFetchTimer.restart()
