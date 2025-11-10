@@ -1,26 +1,25 @@
 import QtQuick
 
 Item {
+    // Geographic coordinates
     property string latitud
     property string longitud
+    // True only when both latitude and longitude are provided
     readonly property bool fullCoordinates: latitud !== "" && longitud !== ""
-
+    // Sunrise and sunset times (in minutes since midnight, local)
     property int sunrise: 0
     property int sunset: 0
+    // Indicates whether it's currently daytime
     property bool isday: true
-
-    // -------------------
-    // Time format
-    // -------------------
-    property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
+    // Time display format (12-hour or 24-hour)
+    property int timeFormat: plasmoid.configuration.timeFormat
+    // Formatted sunrise time as text based on timeFormat
     property string sunriseText: minutesToTimeString(sunrise)
     property string sunsetText: minutesToTimeString(sunset)
 
     signal update
 
-    // -------------------
     // Cache
-    // -------------------
     property string cacheDate: ""
     property int cacheSunrise: 0
     property int cacheSunset: 0
@@ -28,6 +27,7 @@ Item {
     property string cacheLng: ""
     property var lastFetchTime: new Date(0)
 
+    // Delay fetching sun data
     Timer {
         id: delayFetchTimer
         interval: 50
@@ -37,6 +37,7 @@ Item {
         }
     }
 
+    // Run new fetch every two hours
     Timer {
         id: twoHourTimer
         interval: 2 * 60 * 60 * 1000
@@ -56,6 +57,7 @@ Item {
                 return localMinutes
     }
 
+    // Build request URL for today's sunrise/sunset data
     function apiUrl() {
         var today = new Date().toISOString().slice(0, 10)
         return "https://api.sunrise-sunset.org/json?lat=" + latitud +
@@ -64,12 +66,14 @@ Item {
         "&formatted=0" // UTC times
     }
 
+    // Fetch and update sunrise/sunset times using external API
     function fetchSunData() {
         if (!fullCoordinates) return
 
             var now = new Date()
             var todayStr = now.toISOString().slice(0,10)
 
+            // Check if cached data is still valid
             if (cacheLat === latitud && cacheLng === longitud && cacheDate === todayStr && (now - lastFetchTime) < 2*60*60*1000) {
                 sunrise = cacheSunrise
                 sunset  = cacheSunset
@@ -78,6 +82,7 @@ Item {
                 return
             }
 
+            // Request fresh data from API
             var xhr = new XMLHttpRequest()
             xhr.open("GET", apiUrl(), true)
             xhr.onreadystatechange = function() {
@@ -111,6 +116,7 @@ Item {
             xhr.send()
     }
 
+    // Determine whether it's currently day or night
     function updateDayStatus() {
         var now = new Date()
         var localMinutesNow = now.getHours() * 60 + now.getMinutes()
@@ -119,6 +125,7 @@ Item {
             isday = adjustedNow >= sunrise && adjustedNow < sunset
     }
 
+    // Check if a given hour (0–23) is during daytime
     function isDayForHour(hour) {
         if (sunrise === 0 && sunset === 0) return true
             var minutes = hour * 60
@@ -127,6 +134,7 @@ Item {
                 return minutes >= sunrise && minutes < adjSunset
     }
 
+    // Convert minutes to readable time string (12h/24h format)
     function minutesToTimeString(minutes) {
         var hours = Math.floor(minutes / 60)
         var mins = minutes % 60
@@ -149,8 +157,11 @@ Item {
         sunsetText  = minutesToTimeString(sunset)
     }
 
+    // Refetch data when coordinates change
     onLatitudChanged: delayFetchTimer.restart()
     onLongitudChanged: delayFetchTimer.restart()
+
+    // Manual update trigger
     onUpdate: {
         if (fullCoordinates) fetchSunData()
     }

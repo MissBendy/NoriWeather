@@ -9,7 +9,7 @@ import org.kde.plasma.components 3.0 as PlasmaComponents3
 
 
 Item {
-    id: iconAndTem
+    id: iconAndTemp
 
     Layout.minimumWidth: widthReal
     Layout.minimumHeight: heightReal
@@ -129,7 +129,7 @@ Item {
                 id: tempValue_vertical
                 height: parent.height
                 text: wrapper.currentTemp
-                font.bold: boldfonts
+                font.weight: boldconditions ? Font.DemiBold : Font.Medium
                 font.pixelSize: fonssizes
                 color: PlasmaCore.Theme.textColor
                 horizontalAlignment: Text.AlignHCenter
@@ -138,7 +138,7 @@ Item {
                 id: tempUnit_vertical
                 height: parent.height
                 text: (wrapper.unitsTemperature === "0") ? " °C" : " °F"
-                font.bold: boldfonts
+                font.weight: boldconditions ? Font.DemiBold : Font.Medium
                 font.pixelSize: fonssizes
                 color: PlasmaCore.Theme.textColor
                 horizontalAlignment: Text.AlignHCenter
