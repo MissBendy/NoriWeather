@@ -91,7 +91,7 @@ Item {
 
   // Range and temperature storage
   property int numberOfDays: 6
-  property string currentTemperature: dataweather !== "0" ? temperature(safeInt(dataweather, 1)) : "?"
+  property string currentTemperature: "?"
   property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
 
   // Weather codes and derived values
@@ -103,22 +103,11 @@ Item {
   property string maxweatherCurrent: temperature(safeString(dataweather, 3))
 
   // Hourly temperature samples
-  property var tempHours: [
-    temperature(safeInt(dataweather, 9)),
-    temperature(safeInt(dataweather, 10)),
-    temperature(safeInt(dataweather, 11)),
-    temperature(safeInt(dataweather, 12)),
-    temperature(safeInt(dataweather, 13))
-  ]
+  property var tempHours: []
 
   // Hourly icon samples
-  property var iconHours: [
-    assignIcon(safeString(dataweather, 14)),
-    assignIcon(safeString(dataweather, 15)),
-    assignIcon(safeString(dataweather, 16)),
-    assignIcon(safeString(dataweather, 17)),
-    assignIcon(safeString(dataweather, 18))
-  ]
+  property var iconHours: []
+
 
   // Daily forecast min/max
   property string minweatherTomorrow: twoMin
@@ -128,7 +117,7 @@ Item {
   property string minweatherTwoDaysAfterTomorrow: fourMin
   property string maxweatherTwoDaysAfterTomorrow: fourMax
   // Current weather icon and UV/wind info
-  property string iconWeatherCurrent: assignIcon(codeweather)
+  property string iconWeatherCurrent: assignIcon(codeweather || 0, determinateDay.isDayForHour(currentHour))
   property string uvindex: uvIndexLevelAssignment(safeInt(dataweather, 7))
   property string windSpeed: safeString(dataweather, 6)
   // Translated text for weather condition
@@ -146,7 +135,7 @@ Item {
   property string uvtext: Translate.uvRadiationText(languageCode)
   property string windSpeedText: Translate.windSpeedText(languageCode)
   // Day/night state and city name
-  property bool isDay: determinateDay.isday
+  property bool isDay: determinateDay.isDayForHour(currentHour)
   property string city: "unk"
   property string prefixIcon: determinateDay.isDayForHour(new Date().getHours()) ? "" : "-night"
 
@@ -181,7 +170,6 @@ Item {
 
   // React to coordinate changes and refresh data
   onObserverCoordenatesChanged: {
-    console.log("Coordinates changed, updating weather");
     if (latitude && longitud && latitude !== "0" && longitud !== "0") {
       updateWeather(2);
       getCityFunction();
@@ -209,14 +197,36 @@ Item {
       if (isUpdate) newValuesWeather = result;
       else dataweather = result;
 
-      const timeInfo = getCurrentTimeInfo();
-      const { now, seconds, currentMinute, currentHour } = timeInfo;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const isDayNow = determinateDay.isDayForHour(currentHour);
 
       getForecastWeather();
+
+      // Update main UI immediately
+      root.isDay = isDayNow;
+      root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
+      root.iconWeatherCurrent = assignIcon(safeString(dataweather, 4) || 0, isDayNow);
+      root.currentTemperature = temperature(safeInt(dataweather, 1));
+
+      // Update hourly icons immediately
+      iconHours = [];
+      for (let i = 0; i < 5; i++) {
+        const forecastTime = new Date(now.getTime());
+        forecastTime.setHours(currentHour + i + 1, 0, 0, 0);
+        const code = safeString(dataweather, 14 + i);
+        const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
+        iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
+      }
+
+      tempHours = [];
+      for (let i = 0; i < 5; i++) {
+        tempHours.push(temperature(safeInt(dataweather, 9 + i))); // same indices as before
+      }
+
       retry.start();
     });
   }
-
   // Keep track of time
   function getCurrentTimeInfo() {
     const now = new Date();
@@ -442,63 +452,55 @@ Item {
   // Timer for frequent automatic weather and icon updates
   Timer {
     id: weatherUpdateTimer
-    running: false // start stopped
+    running: false
     repeat: true
-    interval: 1000 // check every second
+    interval: 1000
 
-    property int lastFrequentSecond: -1
     property int lastMinuteUpdated: -1
     property int lastHourUpdated: -1
 
     onTriggered: {
       const timeInfo = getCurrentTimeInfo();
-      const { now, seconds, currentMinute, currentHour } = timeInfo;
+      const { now, currentMinute, currentHour } = timeInfo;
 
-      // 30-second refresh
-      if ((seconds % 30 === 0) && seconds !== lastFrequentSecond) {
-        lastFrequentSecond = seconds
-        console.log("30-second refresh triggered")
+      // Minute-based refresh
+      if (currentMinute !== lastMinuteUpdated) {
+        lastMinuteUpdated = currentMinute
+        console.log("Minute refresh triggered")
         updateWeather(2)
         determinateDay.update()
         if (dataweather && dataweather !== "0") {
           currentTemperature = temperature(safeInt(dataweather, 1))
           console.log("Updated temperature:", currentTemperature)
         }
-      }
 
-      // Current Day/Night icon update
-      if (currentMinute !== lastMinuteUpdated) {
-        lastMinuteUpdated = currentMinute
-
+        // Current Day/Night icon update
         const isDayNow = determinateDay.isday
         console.log("Checking day/night status:", isDayNow ? "Day" : "Night")
-
         iconWeatherCurrent = assignIcon(codeweather || 0, isDayNow)
         root.isDay = isDayNow
         root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor
-
         console.log("Updated current icon to:", iconWeatherCurrent)
         console.log("Updated left panel to:", root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor")
       }
 
-      // Update hourly forecast icons at top of the hour
+      // Hourly update at top of the hour
       if (currentHour !== lastHourUpdated) {
-        console.log("Updating hourly forecast icons:")
+        console.log("Updating hourly forecast icons and temperatures:")
         iconHours = []
+        tempHours = []
         for (let i = 0; i < 5; i++) {
           const forecastTime = new Date(now.getTime())
           forecastTime.setHours(currentHour + i + 1, 0, 0, 0)
             const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours())
             const code = safeString(dataweather, 14 + i)
+            const temp = temperature(safeInt(dataweather, 9 + i))
+
             iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown")
+            tempHours.push(temp)
+            console.log(`Hourly data: icon ${i + 1}: ${iconHours[i]} / temperature ${i + 1}: ${tempHours[i]}`)
         }
-
         lastHourUpdated = currentHour
-
-        // Log each hourly icon individually
-        iconHours.forEach((icon, index) => {
-          console.log(`Hourly icon ${index + 1}:`, icon)
-        })
       }
     }
   }

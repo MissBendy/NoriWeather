@@ -60,10 +60,12 @@ Item {
     // Build request URL for today's sunrise/sunset data
     function apiUrl() {
         var today = new Date().toISOString().slice(0, 10)
-        return "https://api.sunrise-sunset.org/json?lat=" + latitud +
+        var url = "https://api.sunrise-sunset.org/json?lat=" + latitud +
         "&lng=" + longitud +
         "&date=" + today +
         "&formatted=0" // UTC times
+        console.log("Generated Sun Data URL:", url)
+        return url
     }
 
     // Fetch and update sunrise/sunset times using external API
