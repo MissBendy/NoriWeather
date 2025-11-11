@@ -1,3 +1,4 @@
+// Main Plasmoid item managing weather data and forecasts
 import QtQuick
 import QtQuick.Layouts 1.1
 import org.kde.plasma.plasmoid
@@ -10,12 +11,14 @@ PlasmoidItem {
     id: wrapper
     anchors.fill: parent
 
+    // Weather data component providing current and forecast info
     Components.WeatherData {
         id: weatherData
     }
 
     signal reset
 
+    // Properties for binding current weather, temperature units, time format, location, and icons
     property string currentTemp: weatherData.currentTemperature
     property string unitsTemperature: plasmoid.configuration.temperatureUnit
     property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
@@ -31,6 +34,7 @@ PlasmoidItem {
     property date currentDateTime: new Date()
     readonly property int currentDayOfWeek: currentDateTime.getDay()
 
+    // Models to hold hourly and daily forecast data
     ListModel {
         id: hoursWeatherModel
     }
@@ -38,6 +42,7 @@ PlasmoidItem {
         id: forecastModel
     }
 
+    // Translate day index to localized day name
     function getTranslatedDayInitial(dayIndex) {
         var tempDate = new Date(currentDateTime)
         tempDate.setDate(tempDate.getDate() + dayIndex)
@@ -57,6 +62,7 @@ PlasmoidItem {
         return hours
     }
 
+    // Populate hourly forecast model
     function hoursForecast() {
         const forecastHoursArr = getNextForecastHours()
         hoursWeatherModel.clear()
@@ -69,6 +75,7 @@ PlasmoidItem {
         }
     }
 
+    // Update hourly forecast model with new values
     function hoursForecastUpdate() {
         const forecastHoursArr = getNextForecastHours()
         for (let i = 0; i < hoursWeatherModel.count; i++) {
@@ -76,6 +83,7 @@ PlasmoidItem {
         }
     }
 
+    // Update temperature units in all models
     function updateUnitsTempe() {
         const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
         const Mins = [weatherData.oneMin, weatherData.twoMin, weatherData.threeMin, weatherData.fourMin, weatherData.fiveMin]
@@ -89,6 +97,7 @@ PlasmoidItem {
         }
     }
 
+    // Timer to check for outdated weather data and trigger refresh
     Timer {
         id: checkUpdateTimer
         interval: 5000
@@ -104,6 +113,7 @@ PlasmoidItem {
         }
     }
 
+    // Populate daily forecast model
     function updateForecastModel() {
         const iconsArr = [weatherData.oneIcon, weatherData.twoIcon, weatherData.threeIcon, weatherData.fourIcon, weatherData.fiveIcon]
         const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
@@ -120,6 +130,7 @@ PlasmoidItem {
             }
     }
 
+    // Refresh all forecast data and mark as updated
     function forms() {
         currentDateTime = new Date()
         if (isUpdate) {
@@ -132,16 +143,19 @@ PlasmoidItem {
         }
     }
 
+    // Update temperature units if configuration changes
     onUnitsTemperatureChanged: {
         updateUnitsTempe()
     }
 
+    // Connect weather data changes to refresh function
     Component.onCompleted: {
         weatherData.dataChanged.connect(() => {
             Qt.callLater(forms)
         })
     }
 
+    // Representations for the plasmoid
     preferredRepresentation: compactRepresentation
     compactRepresentation: compactRepresentation
     fullRepresentation: compactRepresentation

@@ -1,3 +1,4 @@
+// Main QML item for a Plasma popup window with dynamic positioning and a background SVG
 /*
  *  SPDX-FileCopyrightText: zayronxio
  *  SPDX-License-Identifier: GPL-3.0-or-later
@@ -15,58 +16,58 @@ import org.kde.ksvg 1.0 as KSvg
 Item {
     id: main
 
+    // Properties to hold plasmoid dimensions
     property int plasmoidWidV: 0
     property int plasmoidWidH: 0
 
+    // Toggle visibility of the popup when main item's visibility changes
     onVisibleChanged: {
         root.visible = !root.visible
     }
 
+    // Background SVG for the popup, initially hidden
     KSvg.FrameSvgItem {
-        id : backgroundSvg
-
+        id: backgroundSvg
         visible: false
-
         imagePath: "dialogs/background"
     }
 
-
+    // Update plasmoid status based on popup visibility
     Plasmoid.status: root.visible ? PlasmaCore.Types.RequiresAttentionStatus : PlasmaCore.Types.PassiveStatus
 
+    // The floating dialog that acts as the popup
     PlasmaCore.Dialog {
         id: root
-
         objectName: "popupWindow"
         flags: Qt.WindowStaysOnTopHint
         location: PlasmaCore.Types.Floating
         hideOnWindowDeactivate: true
 
+        // Update position when size changes
         onHeightChanged: {
             var pos = popupPosition(width, height);
             x = pos.x;
             y = pos.y;
         }
-
         onWidthChanged: {
             var pos = popupPosition(width, height);
             x = pos.x;
             y = pos.y;
         }
 
+        // Toggle popup visibility
         function toggle() {
             main.visible = !main.visible;
         }
 
+        // Position the popup based on screen and panel location
         onVisibleChanged: {
             if (visible) {
                 var pos = popupPosition(width, height);
                 x = pos.x;
                 y = pos.y;
-
-                //animation1.start()
             }
         }
-
 
         function popupPosition(width, height) {
             var screenAvail = wrapper.availableScreenRect;
@@ -83,12 +84,20 @@ Item {
 
             switch (plasmoid.location) {
                 case PlasmaCore.Types.BottomEdge:
-                    var x = appletTopLeft.x < (screen.width - width/2 + backgroundSvg.margins.left + Kirigami.Units.gridUnit) ? appletTopLeft.x < ((width/2) + backgroundSvg.margins.left) ? Kirigami.Units.gridUnit -  backgroundSvg.margins.left : appletTopLeft.x - width/2  : screen.width - (width - backgroundSvg.margins.left*2) - Kirigami.Units.gridUnit ;
+                    var x = appletTopLeft.x < (screen.width - width/2 + backgroundSvg.margins.left + Kirigami.Units.gridUnit)
+                    ? appletTopLeft.x < ((width/2) + backgroundSvg.margins.left)
+                    ? Kirigami.Units.gridUnit -  backgroundSvg.margins.left
+                    : appletTopLeft.x - width/2
+                    : screen.width - (width - backgroundSvg.margins.left*2) - Kirigami.Units.gridUnit ;
                     var y = appletTopLeft.y - height - Kirigami.Units.gridUnit
                     return calculatePosition(x, y);
 
                 case PlasmaCore.Types.TopEdge:
-                    x = appletTopLeft.x < (width/2 + backgroundSvg.margins.left + Kirigami.Units.gridUnit) ? backgroundSvg.margins.left : appletTopLeft.x > (screen.width - (width/2) - backgroundSvg.margins.left - Kirigami.Units.gridUnit) ? screen.width - width - backgroundSvg.margins.left : appletTopLeft.x - width/2 - backgroundSvg.margins.left
+                    x = appletTopLeft.x < (width/2 + backgroundSvg.margins.left + Kirigami.Units.gridUnit)
+                    ? backgroundSvg.margins.left
+                    : appletTopLeft.x > (screen.width - (width/2) - backgroundSvg.margins.left - Kirigami.Units.gridUnit)
+                    ? screen.width - width - backgroundSvg.margins.left
+                    : appletTopLeft.x - width/2 - backgroundSvg.margins.left
                     y = appletTopLeft.y + panelH + Kirigami.Units.gridUnit
                     return calculatePosition(x, y);
 
@@ -106,11 +115,12 @@ Item {
                     return;
             }
         }
+
         FocusScope {
             id: rootItem
             Layout.minimumWidth:  Kirigami.Units.gridUnit * 20
             Layout.maximumWidth:  minimumWidth
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 11 // 170
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 11
             Layout.maximumHeight: minimumHeight
             focus: true
 
@@ -122,6 +132,8 @@ Item {
                 width: widthOfLeftPanel
                 height: parent.height
             }
+
+            // Forecast item panel next to the full container
             ItemForecasts {
                 width: parent.width - fullContainer.width
                 height: parent.height

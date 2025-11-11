@@ -1,3 +1,4 @@
+// QML configuration panel for weather plasmoid settings
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -7,24 +8,15 @@ import org.kde.plasma.core 2.0 as PlasmaCore
 Item {
     id: root
 
-
+    // Signal emitted when any configuration changes
     signal configurationChanged
 
-    QtObject {
-        id: fontsizeValue
-        property var value
-    }
+    // Helper objects to store values for temperature unit, font size, and time format
+    QtObject { id: fontsizeValue; property var value }
+    QtObject { id: unidWeatherValue; property var value }
+    QtObject { id: timeFormatValue; property var value }
 
-    QtObject {
-        id: unidWeatherValue
-        property var value
-    }
-
-    QtObject {
-        id: timeFormatValue
-        property var value
-    }
-
+    // Configuration property aliases connected to UI controls
     property alias cfg_coordinatesIP: coordinatesIP.checked
     property alias cfg_displayWeatherInPanel: displayWeather.checked
     property alias cfg_manualLatitude: latitude.text
@@ -34,76 +26,70 @@ Item {
     property alias cfg_sizeFontConfig: fontsizeValue.value
     property alias cfg_fontBoldWeather: boldWeather.checked
 
-
+    // Main vertical layout
     ColumnLayout {
-        id:mainColumn
+        id: mainColumn
         spacing: Kirigami.Units.largeSpacing
         Layout.fillWidth: true
 
-        GridLayout{
+        // Grid layout for individual settings
+        GridLayout {
             id: settingsGrid
             columns: 2
 
+            // Use IP-based coordinates
             Label {
                 id: useIPlocation
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Use geographical coordinates from the IP") + ":"
                 horizontalAlignment: Label.AlignRight
             }
-            CheckBox {
-                id: coordinatesIP
-            }
+            CheckBox { id: coordinatesIP }
 
+            // Manual latitude input (shown if IP coordinates not used)
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Latitude") + ":"
                 visible: !coordinatesIP.checked
                 horizontalAlignment: Label.AlignRight
             }
-            TextField {
-                id: latitude
-                visible: !coordinatesIP.checked
-                width: 110
-            }
+            TextField { id: latitude; visible: !coordinatesIP.checked; width: 110 }
+
+            // Manual longitude input (shown if IP coordinates not used)
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Longitude") + ":"
                 visible: !coordinatesIP.checked
                 horizontalAlignment: Label.AlignRight
             }
-            TextField {
-                id: longitude
-                visible: !coordinatesIP.checked
-                width: 110
-            }
+            TextField { id: longitude; visible: !coordinatesIP.checked; width: 110 }
 
+            // Display weather on panel
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Display weather conditions on the panel") + ":"
                 horizontalAlignment: Label.AlignRight
             }
-            CheckBox {
-                id: displayWeather
+            CheckBox { id: displayWeather }
 
-            }
+            // Bold weather text option
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Bold weather conditions on the panel") + ":"
                 horizontalAlignment: Label.AlignRight
             }
-            CheckBox {
-                id: boldWeather
-            }
+            CheckBox { id: boldWeather }
 
+            // Time format selection
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Time format") + ":"
                 horizontalAlignment: Label.AlignRight
             }
             ComboBox {
+                id: timeFormatComboBox
                 textRole: "text"
                 valueRole: "value"
-                id: timeFormatComboBox
                 model: [
                     { text: i18n("12-hour"), value: 12 },
                     { text: i18n("24-hour"), value: 24 }
@@ -112,52 +98,51 @@ Item {
                 Component.onCompleted: currentIndex = indexOfValue(timeFormatValue.value)
             }
 
+            // Temperature unit selection
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Temperature unit") + ":"
                 horizontalAlignment: Label.AlignRight
             }
             ComboBox {
+                id: unitComboBox
                 textRole: "text"
                 valueRole: "value"
-                id: unitComboBox
                 model: [
-                    {text: i18n("Celsius (°C)"), value: 0},
-                    {text: i18n("Fahrenheit (°F)"), value: 1},
+                    { text: i18n("Celsius (°C)"), value: 0 },
+                    { text: i18n("Fahrenheit (°F)"), value: 1 }
                 ]
                 onActivated: unidWeatherValue.value = currentValue
                 Component.onCompleted: currentIndex = indexOfValue(unidWeatherValue.value)
             }
 
+            // Font size selection
             Label {
-                Layout.minimumWidth: root.width/2
+                Layout.minimumWidth: root.width / 2
                 text: i18n("Font Size") + ":"
                 horizontalAlignment: Label.AlignRight
             }
-
             ComboBox {
+                id: valueForSizeFont
                 textRole: "text"
                 valueRole: "value"
                 width: 32
-                id: valueForSizeFont
                 model: [
-                    {text: i18n("8"), value: 8},
-                    {text: i18n("9"), value: 9},
-                    {text: i18n("10"), value: 10},
-                    {text: i18n("11"), value: 11},
-                    {text: i18n("12"), value: 12},
-                    {text: i18n("13"), value: 13},
-                    {text: i18n("14"), value: 14},
-                    {text: i18n("15"), value: 15},
-                    {text: i18n("16"), value: 16},
-                    {text: i18n("17"), value: 17},
-                    {text: i18n("18"), value: 18},
-
+                    { text: i18n("8"), value: 8 },
+                    { text: i18n("9"), value: 9 },
+                    { text: i18n("10"), value: 10 },
+                    { text: i18n("11"), value: 11 },
+                    { text: i18n("12"), value: 12 },
+                    { text: i18n("13"), value: 13 },
+                    { text: i18n("14"), value: 14 },
+                    { text: i18n("15"), value: 15 },
+                    { text: i18n("16"), value: 16 },
+                    { text: i18n("17"), value: 17 },
+                    { text: i18n("18"), value: 18 }
                 ]
                 onActivated: fontsizeValue.value = currentValue
                 Component.onCompleted: currentIndex = indexOfValue(fontsizeValue.value)
             }
-
         }
     }
 }

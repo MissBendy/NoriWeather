@@ -64,7 +64,7 @@ Item {
         "&lng=" + longitud +
         "&date=" + today +
         "&formatted=0" // UTC times
-        console.log("Generated Sun Data URL:", url)
+        // console.log("Generated Sun Data URL:", url) Debug: confirm generated URL
         return url
     }
 

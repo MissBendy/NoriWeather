@@ -1,16 +1,20 @@
+// QML item representing the left panel of a weather display
+// Showing current location, temperature, and weather info
 import QtQuick
 import org.kde.kirigami as Kirigami
 import QtQuick.Controls as Controls
 
 Item {
+    // Margins and spacing for layout adjustments
     property int leftPanelMargin: 0
     property int topPanelMargin: 0
     property int exedentHight: 0
     property int spacingElements: 5
 
-    // dynamic width based on temperature text + icon + padding
+    // Dynamic width of left panel based on weather icon and temperature text
     property int widthOfLeftPanel: logo.width + text.implicitWidth + 20
 
+    // Left panel background container
     LeftPanel {
         id: leftPanel
         anchors.left: parent.left
@@ -21,10 +25,12 @@ Item {
         height: parent.height + exedentHight
     }
 
+    // Main content container inside left panel
     Item {
         width: leftPanel.width
         anchors.top: parent.top
 
+        // City name heading
         Kirigami.Heading {
             id: city
             width: parent.width - leftPanel.marginLeftReal
@@ -35,6 +41,7 @@ Item {
             elide: Text.ElideRight
         }
 
+        // Row showing current weather icon and temperature
         Row {
             id: current
             width: parent.width - leftPanel.marginLeftReal
@@ -43,6 +50,7 @@ Item {
             height: text.implicitHeight
             spacing: 5
 
+            // Current weather icon
             Kirigami.Icon {
                 id: logo
                 source: wrapper.currentIcon
@@ -51,9 +59,10 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
+            // Current temperature label
             Controls.Label {
                 id: text
-                width: implicitWidth  // use implicitWidth for dynamic sizing
+                width: implicitWidth
                 text: wrapper.currentTemp + "°"
                 color: Kirigami.Theme.textColor
                 font.weight: Font.Normal
@@ -62,6 +71,7 @@ Item {
             }
         }
 
+        // Column displaying current weather description and max/min temperature
         Column {
             anchors.top: current.bottom
             width: current.width
@@ -69,6 +79,7 @@ Item {
             anchors.topMargin: spacingElements
             opacity: 0.85
 
+            // Weather description
             Kirigami.Heading {
                 id: textDo
                 width: parent.width - leftPanel.marginLeftReal
@@ -79,6 +90,7 @@ Item {
                 elide: Text.ElideRight
             }
 
+            // Max/Min temperature
             Kirigami.Heading {
                 width: parent.width - leftPanel.marginLeftReal
                 text: wrapper.currentMaxMin
@@ -90,6 +102,7 @@ Item {
         }
     }
 
+    // Footer link to open-meteo.com
     Item {
         width: link.implicitWidth
         height: link.implicitHeight
@@ -106,6 +119,7 @@ Item {
             elide: Text.ElideRight
         }
 
+        // Make the link clickable
         MouseArea {
             anchors.fill: parent
             onClicked: Qt.openUrlExternally("https://open-meteo.com")
