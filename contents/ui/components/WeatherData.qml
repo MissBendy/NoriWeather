@@ -184,21 +184,21 @@ Item {
       const isDayNow = determinateDay.isDayForHour(currentHour);
 
       // Current temperature and weather code
-      root.currentTemperature = temperature(safeInt(dataweather, 1));
-      root.iconWeatherCurrent = assignIcon(safeInt(dataweather, 16), isDayNow);
+      currentTemperature = temperature(safeInt(dataweather, 1));
+      iconWeatherCurrent = assignIcon(safeInt(dataweather, 16), isDayNow);
       // Daily temperatures min/max
-      root.minweatherCurrent = temperature(safeInt(dataweather, 2));
-      root.maxweatherCurrent = temperature(safeInt(dataweather, 9));
-      root.minweatherTomorrow = temperature(safeInt(dataweather, 3));
-      root.maxweatherTomorrow = temperature(safeInt(dataweather, 10));
-      root.minweatherDayAftertomorrow = temperature(safeInt(dataweather, 4));
-      root.maxweatherDayAftertomorrow = temperature(safeInt(dataweather, 11));
-      root.minweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
-      root.maxweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
+      minweatherCurrent = temperature(safeInt(dataweather, 2));
+      maxweatherCurrent = temperature(safeInt(dataweather, 9));
+      minweatherTomorrow = temperature(safeInt(dataweather, 3));
+      maxweatherTomorrow = temperature(safeInt(dataweather, 10));
+      minweatherDayAftertomorrow = temperature(safeInt(dataweather, 4));
+      maxweatherDayAftertomorrow = temperature(safeInt(dataweather, 11));
+      minweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
+      maxweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
       // Daily weather icons
-      root.codeweatherTomorrow = safeString(dataweather, 28);
-      root.codeweatherDayAftertomorrow = safeString(dataweather, 29);
-      root.codeweatherTwoDaysAfterTomorrow = safeString(dataweather, 30);
+      codeweatherTomorrow = safeString(dataweather, 28);
+      codeweatherDayAftertomorrow = safeString(dataweather, 29);
+      codeweatherTwoDaysAfterTomorrow = safeString(dataweather, 30);
 
       // Hourly temperatures (next 5 hours)
       tempHours = [];
@@ -548,16 +548,20 @@ Item {
   // Recalculate displayed temperature when unit preference changes
   onTemperatureUnitChanged: {
     if (dataweather && dataweather !== "0") {
-        // Update current temperature
-        currentTemperature = temperature(safeInt(dataweather, 1));
+      // Update current temperature
+      currentTemperature = temperature(safeInt(dataweather, 1));
 
-        // Recalculate hourly temperatures
-        const words = dataweather.split(/\s+/);
-        tempHours = [];
-        for (let i = 0; i < 5; i++) {
-            let temp = safeInt(dataweather, 17 + i); // original hourly temps
-            tempHours.push(temperature(temp));
-        }
+      // Recalculate min/max for current day
+      minweatherCurrent = temperature(safeInt(dataweather, 2));
+      maxweatherCurrent = temperature(safeInt(dataweather, 9));
+
+      // Recalculate hourly temperatures
+      const words = dataweather.split(/\s+/);
+      tempHours = [];
+      for (let i = 0; i < 5; i++) {
+        let temp = safeInt(dataweather, 17 + i);
+        tempHours.push(temperature(temp));
+      }
     }
-}
+  }
 }
