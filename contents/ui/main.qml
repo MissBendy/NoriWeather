@@ -162,7 +162,6 @@ PlasmoidItem {
         }
     }
 
-
     // Refresh all forecast data and mark as updated
     function forms() {
         currentDateTime = new Date()
