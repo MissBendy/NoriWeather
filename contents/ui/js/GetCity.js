@@ -30,7 +30,7 @@ function getNameCity(latitude, longitud, language, callback) {
                     let full = city ? city : state ? state : county;
 
                     // Log and return the result via callback
-                    console.log(full);
+                    console.log("Location:", full);
                     callback(full);
                 } catch (e) {
                     // Handle any JSON parsing errors

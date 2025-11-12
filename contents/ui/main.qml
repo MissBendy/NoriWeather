@@ -19,12 +19,12 @@ PlasmoidItem {
     signal reset
 
     // Properties for binding current weather, temperature units, time format, location, and icons
-    property string currentTemp: weatherData.currentTemperature
+    property string currentTemp: weatherData.tempCurrent
     property string unitsTemperature: plasmoid.configuration.temperatureUnit
     property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
     property string location: weatherData.city
     property string weather: weatherData.weatherShottext
-    property string currentIcon: weatherData.iconWeatherCurrent
+    property string currentIcon: weatherData.iconCurrent
     property string currentMaxMin: weatherData.maxweatherCurrent + "° / " + weatherData.minweatherCurrent + "°"
     property var temps: weatherData.tempHours
     property var icons: weatherData.iconHours
