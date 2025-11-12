@@ -85,8 +85,20 @@ PlasmoidItem {
 
     // Update temperature units in all models
     function updateUnitsTempe() {
-        const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
-        const Mins = [weatherData.oneMin, weatherData.twoMin, weatherData.threeMin, weatherData.fourMin, weatherData.fiveMin]
+        const Maxs = [
+            weatherData.oneMax,
+            weatherData.twoMax,
+            weatherData.threeMax,
+            weatherData.fourMax,
+            weatherData.fiveMax
+        ];
+        const Mins = [
+            weatherData.oneMin,
+            weatherData.twoMin,
+            weatherData.threeMin,
+            weatherData.fourMin,
+            weatherData.fiveMin
+        ];
 
         for (let i = 0; i < forecastModel.count; i++) {
             forecastModel.set(i, { "maxTemp": Maxs[i], "minTemp": Mins[i] })
@@ -115,20 +127,41 @@ PlasmoidItem {
 
     // Populate daily forecast model
     function updateForecastModel() {
-        const iconsArr = [weatherData.oneIcon, weatherData.twoIcon, weatherData.threeIcon, weatherData.fourIcon, weatherData.fiveIcon]
-        const Maxs = [weatherData.oneMax, weatherData.twoMax, weatherData.threeMax, weatherData.fourMax, weatherData.fiveMax]
-        const Mins = [weatherData.oneMin, weatherData.twoMin, weatherData.threeMin, weatherData.fourMin, weatherData.fiveMin]
+        const iconsArr = [
+            weatherData.oneIcon,
+            weatherData.twoIcon,
+            weatherData.threeIcon,
+            weatherData.fourIcon,
+            weatherData.fiveIcon
+        ];
+        const Maxs = [
+            weatherData.oneMax,
+            weatherData.twoMax,
+            weatherData.threeMax,
+            weatherData.fourMax,
+            weatherData.fiveMax
+        ];
+        const Mins = [
+            weatherData.oneMin,
+            weatherData.twoMin,
+            weatherData.threeMin,
+            weatherData.fourMin,
+            weatherData.fiveMin
+        ];
 
-        forecastModel.clear()
-            for (let i = 1; i < 4; i++) {
-                forecastModel.append({
-                    date: getTranslatedDayInitial(i),
-                                     icon: iconsArr[i],
-                                     maxTemp: Maxs[i],
-                                     minTemp: Mins[i]
-                })
-            }
+        forecastModel.clear();
+
+        // Start at 0, but use getTranslatedDayInitial(i + 1) to make first item "tomorrow"
+        for (let i = 0; i < 3; i++) {
+            forecastModel.append({
+                date: getTranslatedDayInitial(i + 1), // tomorrow, day after, etc.
+                                 icon: iconsArr[i],
+                                 maxTemp: Maxs[i],
+                                 minTemp: Mins[i]
+            });
+        }
     }
+
 
     // Refresh all forecast data and mark as updated
     function forms() {

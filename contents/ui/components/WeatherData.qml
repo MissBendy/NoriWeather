@@ -63,12 +63,23 @@ Item {
   property int retrysCity: 0
 
   // Date tracking for current and upcoming forecasts
+  property int numberOfDays: 7
+
   property string day: (Qt.formatDateTime(new Date(), "yyyy-MM-dd"))
-  property string targetDay: Qt.formatDateTime(new Date(new Date().getTime() + (numberOfDays * 24 * 60 * 60 * 1000)), "yyyy-MM-dd")
-  property string nextDay: Qt.formatDateTime(new Date(new Date().getTime() + (24 * 60 * 60 * 1000)), "yyyy-MM-dd")
+
+  property string nextDay: {
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return Qt.formatDateTime(d, "yyyy-MM-dd")
+  }
+
+  property string targetDay: {
+    const d = new Date()
+    d.setDate(d.getDate() + numberOfDays)
+    return Qt.formatDateTime(d, "yyyy-MM-dd")
+  }
 
   // Range and temperature storage
-  property int numberOfDays: 6
   property string tempCurrent: "?" // index 1
   property string minweatherCurrent: "?"
   property string maxweatherCurrent: "?"

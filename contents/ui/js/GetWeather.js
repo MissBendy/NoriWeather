@@ -52,22 +52,22 @@ function getWeatherData(latitud, longitud, hours, callback) {
                 let full = temperaturaActual + " " + tempMins + " " + tempMaxs + " " + codeCurrentWeather + " " + hourlyWeather + " " + hourlyWeatherCodes + " " + dailyCodes;
 
                 // Print the combined string first
-                //console.log("=== Combined Full String ===");
-                //console.log(full);
+                console.log("=== Combined Full String ===");
+                console.log(full);
 
                 // Labeled console output for clarity
-                //console.log("\n=== Current Weather ===");
-                //console.log("Temperature:", temperaturaActual);
-                //console.log("Weather Code:", codeCurrentWeather);
+                console.log("\n=== Current Weather ===");
+                console.log("Temperature:", temperaturaActual);
+                console.log("Weather Code:", codeCurrentWeather);
 
-                //console.log("\n=== Next 5 Hourly Forecasts ===");
-                //console.log("Temperatures:", hourlyWeather);
-                //console.log("Weather Codes:", hourlyWeatherCodes);
+                console.log("\n=== Next 5 Hourly Forecasts ===");
+                console.log("Temperatures:", hourlyWeather);
+                console.log("Weather Codes:", hourlyWeatherCodes);
 
-                //console.log("\n=== 7-Day Daily Forecast ===");
-                //console.log("Min Temperatures:", tempMins);
-                //console.log("Max Temperatures:", tempMaxs);
-                //console.log("Weather Codes:", dailyCodes);
+                console.log("\n=== 7-Day Daily Forecast ===");
+                console.log("Min Temperatures:", tempMins);
+                console.log("Max Temperatures:", tempMaxs);
+                console.log("Weather Codes:", dailyCodes);
 
                 callback(full);
             } else {
