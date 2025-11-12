@@ -12,7 +12,7 @@ Item {
 
   // Extract a word by position from a string
   function obtain(text, index) {
-    let words = text.split(/\s+/); // Divide the text into words using space as a separator
+    var words = text.split(/\s+/); // Divide the text into words using space as a separator
     return words[index - 1]; // The index is -1 because indexes start from 0 in JavaScript
   }
 
@@ -81,14 +81,14 @@ Item {
 
   // Range and temperature storage
   property string tempCurrent: "?" // index 1
-  property string minweatherCurrent: "?"
-  property string maxweatherCurrent: "?"
-  property string minweatherTomorrow: "?"
-  property string maxweatherTomorrow: "?"
-  property string minweatherDayAftertomorrow: "?"
-  property string maxweatherDayAftertomorrow: "?"
-  property string minweatherTwoDaysAfterTomorrow: "?"
-  property string maxweatherTwoDaysAfterTomorrow: "?"
+  property string mintempToday: "?"
+  property string maxtempToday: "?"
+  property string mintempTomorrow: "?"
+  property string maxtempTomorrow: "?"
+  property string mintempDayAftertomorrow: "?"
+  property string maxtempDayAftertomorrow: "?"
+  property string mintempTwoDaysAfterTomorrow: "?"
+  property string maxtempTwoDaysAfterTomorrow: "?"
 
   // Forecast icons and temperatures
   property int oneMin: temperature(safeInt(dataweather, 2))
@@ -193,14 +193,14 @@ Item {
       tempCurrent = temperature(safeInt(dataweather, 1));
       iconCurrent = assignIcon(safeInt(dataweather, 16), isDayNow);
       // Daily temperatures min/max
-      minweatherCurrent = temperature(safeInt(dataweather, 2));
-      maxweatherCurrent = temperature(safeInt(dataweather, 9));
-      minweatherTomorrow = temperature(safeInt(dataweather, 3));
-      maxweatherTomorrow = temperature(safeInt(dataweather, 10));
-      minweatherDayAftertomorrow = temperature(safeInt(dataweather, 4));
-      maxweatherDayAftertomorrow = temperature(safeInt(dataweather, 11));
-      minweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
-      maxweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
+      mintempToday = temperature(safeInt(dataweather, 2));
+      maxtempToday = temperature(safeInt(dataweather, 9));
+      mintempTomorrow = temperature(safeInt(dataweather, 3));
+      maxtempTomorrow = temperature(safeInt(dataweather, 10));
+      mintempDayAftertomorrow = temperature(safeInt(dataweather, 4));
+      maxtempDayAftertomorrow = temperature(safeInt(dataweather, 11));
+      mintempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
+      maxtempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
       // Daily weather icons
       codeweatherCurrent = safeString(dataweather, 16)
       codeweatherTomorrow = safeString(dataweather, 28);
@@ -455,113 +455,127 @@ Item {
     id: weatherUpdateTimer
     running: false
     repeat: true
-    interval: 1000
+    interval: 1000 // 1 minute
 
     property int lastMinuteUpdated: -1
-    property int lastHourUpdated: -1
 
     onTriggered: {
-      const timeInfo = getCurrentTimeInfo();
-      const { now, currentMinute, currentHour } = timeInfo;
+      const now = new Date();
+      const currentMinute = now.getMinutes();
+      const currentHour = now.getHours();
 
-      let hourUpdatedThisCycle = false;
+      if (currentMinute === lastMinuteUpdated) return;
+      lastMinuteUpdated = currentMinute;
 
-      // Hourly update
-      if (currentHour !== lastHourUpdated) {
-        lastHourUpdated = currentHour;
-        hourUpdatedThisCycle = true;
-        console.log("Full weather data update triggered");
+      console.log("Weather update triggered");
+
+      if (dataweather && dataweather !== "0") {
         updateWeather(2);
 
+        //day and night UI updates
+
+        determinateDay.fetchSunData();
+
+        const isDayNow = determinateDay.isDayForHour(currentHour);
+        console.log("Checking day/night status:", isDayNow ? "Day" : "Night");
+
+        const currentCode = safeInt(dataweather, 16);
+        iconCurrent = assignIcon(currentCode, isDayNow);
+        console.log("Updated current icon to:", iconCurrent);
+
+        root.isDay = isDayNow;
+        root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
+        console.log(
+          "Updated left panel to:",
+          root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor"
+        );
+
+        // Current weather
+        tempCurrent = temperature(safeInt(dataweather, 1));
+        console.log("Updated current temperature:", tempCurrent);
+
+        // Hourly forecast
         iconHours = [];
         tempHours = [];
 
-        if (dataweather && dataweather !== "0") {
-          console.log("Updating weather forecast...");
+        for (let i = 0; i < 5; i++) {
+          const forecastTime = new Date(now.getTime());
+          forecastTime.setHours(currentHour + i + 1, 0, 0, 0);
 
-          for (let i = 0; i < 5; i++) {
-            const forecastTime = new Date(now.getTime());
-            forecastTime.setHours(currentHour + i + 1, 0, 0, 0);
+          const temp = safeInt(dataweather, 17 + i);
+          const code = safeInt(dataweather, 22 + i);
+          const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
 
-            const temp = safeInt(dataweather, 17 + i);
-            const code = safeInt(dataweather, 22 + i);
-            const isDayAtTime = determinateDay.isDayForHour(forecastTime.getHours());
-
-            tempHours.push(temperature(temp));
-            iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
-
-            console.log(
-              `Hourly data +${i + 1}h => temp=${tempHours[i]}, icon=${iconHours[i]}`);
-          }
-
-          // Daily temperature updates
-          minweatherCurrent = temperature(safeInt(dataweather, 2));
-          maxweatherCurrent = temperature(safeInt(dataweather, 9));
-          minweatherTomorrow = temperature(safeInt(dataweather, 3));
-          maxweatherTomorrow = temperature(safeInt(dataweather, 10));
-          minweatherDayAftertomorrow = temperature(safeInt(dataweather, 4));
-          maxweatherDayAftertomorrow = temperature(safeInt(dataweather, 11));
-          minweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
-          maxweatherTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
+          tempHours.push(temperature(temp));
+          iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
 
           console.log(
-            `Updated daily min/max for today: ${minweatherCurrent}/${maxweatherCurrent}`);
-          console.log(
-            `Updated daily min/max for tomorrow: ${minweatherTomorrow}/${maxweatherTomorrow}`);
-          console.log(
-            `Updated daily min/max for day after tomorrow: ${minweatherDayAftertomorrow}/${maxweatherDayAftertomorrow}`);
-
-          // Weather codes for coming days
-          codeweatherTomorrow = safeString(dataweather, 28);
-          codeweatherDayAftertomorrow = safeString(dataweather, 29);
-          codeweatherTwoDaysAfterTomorrow = safeString(dataweather, 30);
-
-          console.log(
-            `Updated forecast icon for tomorrow: ${assignIcon(safeInt(dataweather, 28), true)}`);
-          console.log(
-            `Updated forecast icon for day after tomorrow: ${assignIcon(safeInt(dataweather, 29), true)}`);
-          console.log(
-            `Updated forecast icon for two days after tomorrow: ${assignIcon(safeInt(dataweather, 30), true)}`);
-        } else {
-          console.warn("Forecast update skipped: dataweather unavailable");
-        }
-      }
-
-      // Minute refresh (skip weather fetch if hour just refreshed)
-      if (currentMinute !== lastMinuteUpdated) {
-        lastMinuteUpdated = currentMinute;
-
-        if (!hourUpdatedThisCycle) {
-          console.log("Current weather update triggered");
-          updateWeather(2);
-        } else {
-          console.log("Current weather refresh skipped, already updated");
-        }
-
-        if (dataweather && dataweather !== "0") {
-          tempCurrent = temperature(safeInt(dataweather, 1));
-          console.log("Updated current temperature:", tempCurrent);
-
-          determinateDay.fetchSunData();
-
-          const now = new Date();
-          const currentHour = now.getHours();
-          const isDayNow = determinateDay.isDayForHour(currentHour);
-          console.log("Checking day/night status:", isDayNow ? "Day" : "Night");
-
-          const currentCode = safeInt(dataweather, 16);
-          iconCurrent = assignIcon(currentCode, isDayNow);
-          console.log("Updated current icon to:", iconCurrent);
-
-          root.isDay = isDayNow;
-          root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
-          console.log(
-            "Updated left panel to:",
-            root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor"
+            `Hourly data +${i + 1}h => temp=${tempHours[i]}, icon=${iconHours[i]}`
           );
-        } else {
-          console.warn("Current weather update skipped: no dataweather available");
         }
+
+        // Temperatures for coming days
+        oneMin: temperature(safeInt(dataweather, 2))
+        twoMin: temperature(safeInt(dataweather, 3))
+        threeMin: temperature(safeInt(dataweather, 4))
+        fourMin: temperature(safeInt(dataweather, 5))
+        fiveMin: temperature(safeInt(dataweather, 6))
+        sixMin: temperature(safeInt(dataweather, 7))
+        sevenMin: temperature(safeInt(dataweather, 8))
+        neMax: temperature(safeInt(dataweather, 9))
+        twoMax: temperature(safeInt(dataweather, 10))
+        threeMax: temperature(safeInt(dataweather, 11))
+        ourMax: temperature(safeInt(dataweather, 12))
+        fiveMax: temperature(safeInt(dataweather, 13))
+        sixMax: temperature(safeInt(dataweather, 14))
+        sevenMax: temperature(safeInt(dataweather, 15))
+
+        // Actual daily temperature shown
+        mintempToday = temperature(safeInt(dataweather, 2));
+        maxtempToday = temperature(safeInt(dataweather, 9));
+        mintempTomorrow = temperature(safeInt(dataweather, 3));
+        maxtempTomorrow = temperature(safeInt(dataweather, 10));
+        mintempDayAftertomorrow = temperature(safeInt(dataweather, 4));
+        maxtempDayAftertomorrow = temperature(safeInt(dataweather, 11));
+        mintempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
+        maxtempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
+
+        console.log(
+          `Updated daily min/max for today: ${mintempToday}/${maxtempToday}`
+        );
+        console.log(
+          `Updated daily min/max for tomorrow: ${mintempTomorrow}/${maxtempTomorrow}`
+        );
+        console.log(
+          `Updated daily min/max for day after tomorrow: ${mintempDayAftertomorrow}/${maxtempDayAftertomorrow}`
+        );
+
+        // Weather codes for coming days
+        oneIcon = assignIcon(safeInt(dataweather, 27), true);
+        twoIcon = assignIcon(safeInt(dataweather, 28), true);
+        threeIcon = assignIcon(safeInt(dataweather, 29), true);
+        fourIcon = assignIcon(safeInt(dataweather, 30), true);
+        fiveIcon = assignIcon(safeInt(dataweather, 31), true);
+        sixIcon = assignIcon(safeInt(dataweather, 32), true);
+        sevenIcon = assignIcon(safeInt(dataweather, 33), true);
+
+        // Actual daily icons shown
+        codeweatherTomorrow = safeString(dataweather, 28);
+        codeweatherDayAftertomorrow = safeString(dataweather, 29);
+        codeweatherTwoDaysAfterTomorrow = safeString(dataweather, 30);
+
+
+        console.log(
+          `Updated daily icon for tomorrow: ${assignIcon(safeInt(dataweather, 28), true)}`
+        );
+        console.log(
+          `Updated daily icon for day after tomorrow: ${assignIcon(safeInt(dataweather, 29), true)}`
+        );
+        console.log(
+          `Updated daily icon for two days after tomorrow: ${assignIcon(safeInt(dataweather, 30), true)}`
+        );
+      } else {
+        console.warn("Weather update skipped: no dataweather available");
       }
     }
   }
@@ -589,8 +603,8 @@ Item {
       tempCurrent = temperature(safeInt(dataweather, 1));
 
       // Recalculate min/max for current day
-      minweatherCurrent = temperature(safeInt(dataweather, 2));
-      maxweatherCurrent = temperature(safeInt(dataweather, 9));
+      mintempToday = temperature(safeInt(dataweather, 2));
+      maxtempToday = temperature(safeInt(dataweather, 9));
 
       // Recalculate hourly temperatures
       const words = dataweather.split(/\s+/);

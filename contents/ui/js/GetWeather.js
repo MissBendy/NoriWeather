@@ -5,70 +5,77 @@ function getWeatherData(latitud, longitud, hours, callback) {
     const end = new Date();
     end.setDate(start.getDate() + 6); // 7 days including today
 
+    // Convert dates to ISO string format for the API
     const startDate = start.toISOString().split('T')[0];
     const endDate = end.toISOString().split('T')[0];
 
     // Build the API request URL
     let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&start_date=${startDate}&end_date=${endDate}&models=ecmwf_ifs025`;
 
-    // Current local hour
-    const now = new Date();
-    const hoursC = now.getHours();
-    const minutes = now.getMinutes();
-    const currentTime = (minutes === 0) ? hoursC : (hoursC + 1) % 24;
-
+    // Create a new XMLHttpRequest
     let req = new XMLHttpRequest();
     req.open("GET", url, true);
 
     req.onreadystatechange = function () {
-        if (req.readyState === 4) {
-            if (req.status === 200) {
+        if (req.readyState === 4) { // Request completed
+            if (req.status === 200) { // Request successful
                 let data = JSON.parse(req.responseText);
 
-                // Current weather
+                // --- Current Weather ---
                 let currents = data.current;
-                let temperaturaActual = currents.temperature_2m;
-                let codeCurrentWeather = currents.weather_code;
+                let temperaturaActual = currents.temperature_2m; // Current temperature
+                let codeCurrentWeather = currents.weather_code;  // Current weather code
 
-                // Daily forecast: all 7 days
+                // --- Daily Forecast ---
                 let daily = data.daily;
-                let tempMins = daily.temperature_2m_min.join(' ');
-                let tempMaxs = daily.temperature_2m_max.join(' ');
-                let dailyCodes = daily.weather_code.join(' ');
+                let tempMins = daily.temperature_2m_min.join(' '); // Min temps for 7 days
+                let tempMaxs = daily.temperature_2m_max.join(' '); // Max temps for 7 days
+                let dailyCodes = daily.weather_code.join(' ');      // Weather codes for 7 days
 
-                // Hourly forecast: current hour + next 4 hours
+                // --- Hourly Forecast ---
                 let hourly = data.hourly;
+
+                const now = new Date();
+                const currentHour = now.getHours();
+
+                // Find the index in hourly.time that matches the current local hour
+                let nowIndex = hourly.time.findIndex(t => new Date(t).getHours() === currentHour);
+                if (nowIndex === -1) nowIndex = 0; // fallback if not found
+
                 let hourlyTemps = [];
                 let hourlyCodes = [];
-                for (let i = 0; i < 5; i++) {
-                    let idx = (currentTime + i) % 24;
+
+                // Get next 5 hours (skipping current hour)
+                for (let i = 1; i <= 5; i++) {
+                    let idx = (nowIndex + i) % hourly.temperature_2m.length; // wrap around if index exceeds array length
                     hourlyTemps.push(hourly.temperature_2m[idx]);
                     hourlyCodes.push(hourly.weather_code[idx]);
                 }
+
+                // Convert hourly arrays to space-separated strings
                 let hourlyWeather = hourlyTemps.join(' ');
                 let hourlyWeatherCodes = hourlyCodes.join(' ');
 
-                // Combine all data into a single string for callback use
+                // Combine all data into a single string to pass to callback
                 let full = temperaturaActual + " " + tempMins + " " + tempMaxs + " " + codeCurrentWeather + " " + hourlyWeather + " " + hourlyWeatherCodes + " " + dailyCodes;
 
-                // Print the combined string first
-                console.log("=== Combined Full String ===");
-                console.log(full);
+                // console.log("Combined Full String");
+                // console.log(full);
 
-                // Labeled console output for clarity
-                console.log("\n=== Current Weather ===");
-                console.log("Temperature:", temperaturaActual);
-                console.log("Weather Code:", codeCurrentWeather);
+                // console.log("Current Weather");
+                // console.log("Temperature:", temperaturaActual);
+                // console.log("Weather Code:", codeCurrentWeather);
 
-                console.log("\n=== Next 5 Hourly Forecasts ===");
-                console.log("Temperatures:", hourlyWeather);
-                console.log("Weather Codes:", hourlyWeatherCodes);
+                // console.log("Next 5 Hourly Forecasts");
+                // console.log("Temperatures:", hourlyWeather);
+                // console.log("Weather Codes:", hourlyWeatherCodes);
 
-                console.log("\n=== 7-Day Daily Forecast ===");
-                console.log("Min Temperatures:", tempMins);
-                console.log("Max Temperatures:", tempMaxs);
-                console.log("Weather Codes:", dailyCodes);
+                // console.log("7-Day Daily Forecast");
+                // console.log("Min Temperatures:", tempMins);
+                // console.log("Max Temperatures:", tempMaxs);
+                // console.log("Weather Codes:", dailyCodes);
 
+                // Execute callback with the full combined string
                 callback(full);
             } else {
                 console.error(`Error in request: weathergeneral ${req.status}`);
@@ -76,5 +83,6 @@ function getWeatherData(latitud, longitud, hours, callback) {
         }
     };
 
+    // Send the request
     req.send();
 }

@@ -25,7 +25,7 @@ PlasmoidItem {
     property string location: weatherData.city
     property string weather: weatherData.weatherShottext
     property string currentIcon: weatherData.iconCurrent
-    property string currentMaxMin: weatherData.maxweatherCurrent + "° / " + weatherData.minweatherCurrent + "°"
+    property string currentMaxMin: weatherData.maxtempToday + "° / " + weatherData.mintempToday + "°"
     property var temps: weatherData.tempHours
     property var icons: weatherData.iconHours
     property alias forecastHours: hoursWeatherModel
@@ -86,14 +86,12 @@ PlasmoidItem {
     // Update temperature units in all models
     function updateUnitsTempe() {
         const Maxs = [
-            weatherData.oneMax,
             weatherData.twoMax,
             weatherData.threeMax,
             weatherData.fourMax,
             weatherData.fiveMax
         ];
         const Mins = [
-            weatherData.oneMin,
             weatherData.twoMin,
             weatherData.threeMin,
             weatherData.fourMin,
@@ -128,21 +126,18 @@ PlasmoidItem {
     // Populate daily forecast model
     function updateForecastModel() {
         const iconsArr = [
-            weatherData.oneIcon,
             weatherData.twoIcon,
             weatherData.threeIcon,
             weatherData.fourIcon,
             weatherData.fiveIcon
         ];
         const Maxs = [
-            weatherData.oneMax,
             weatherData.twoMax,
             weatherData.threeMax,
             weatherData.fourMax,
             weatherData.fiveMax
         ];
         const Mins = [
-            weatherData.oneMin,
             weatherData.twoMin,
             weatherData.threeMin,
             weatherData.fourMin,
