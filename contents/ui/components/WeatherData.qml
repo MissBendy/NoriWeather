@@ -9,10 +9,11 @@ Item {
   id: root
   signal dataChanged
   signal simpleDataReady
+  signal weatherSynced()
 
   // Extract a word by position from a string
   function obtain(text, index) {
-    var words = text.split(/\s+/); // Divide the text into words using space as a separator
+    let words = text.split(/\s+/); // Divide the text into words using space as a separator
     return words[index - 1]; // The index is -1 because indexes start from 0 in JavaScript
   }
 
@@ -56,6 +57,7 @@ Item {
 
   // Track current local hour for display
   property int currentTime: Number(Qt.formatDateTime(new Date(), "h"))
+  property var nextHours: []
 
   // Core weather data and update triggers
   property string dataweather: "0"
@@ -124,8 +126,8 @@ Item {
 
   // Translated text for weather condition
   property string languageCode: ((Qt.locale().name)[0] + (Qt.locale().name)[1])
-  property string weatherLongtext: i18n(textWeather(codeweatherCurrent))
-  property string weatherShottext: i18n(shortTextWeather(codeweatherCurrent))
+  property string weatherLongText: i18n(textWeather(codeweatherCurrent))
+  property string weatherShortText: i18n(shortTextWeather(codeweatherCurrent))
   // Coordinate handling from IP lookup
   property string completeCoordinates: ""
   property string oldCompleteCoordinates: "1"
@@ -207,6 +209,16 @@ Item {
       codeweatherDayAftertomorrow = safeString(dataweather, 29);
       codeweatherTwoDaysAfterTomorrow = safeString(dataweather, 30);
 
+      // Compute upcoming forecast hours
+      const forecastHoursArr = [];
+      const nextHour = (now.getMinutes() === 0 ? currentHour : currentHour + 1) % 24;
+
+      for (let i = 0; i < 5; i++) {
+        forecastHoursArr.push((nextHour + i) % 24);
+      }
+
+      nextHours = forecastHoursArr;
+
       // Hourly temperatures (next 5 hours)
       tempHours = [];
       iconHours = [];
@@ -266,24 +278,26 @@ Item {
   // Map WMO weather codes to icons
   function assignIcon(code, isDay = null) {
     const wmocodes = {
-      0: "clear",
-      1: "few-clouds",
-      2: "few-clouds",
-      3: "clouds",
+      0:  "clear",
+      1:  "few-clouds",
+      2:  "clouds",
+      3:  "many-clouds",
+      45: "overcast",
+      48: "overcast",
       51: "showers-scattered",
       53: "showers-scattered",
       55: "showers-scattered",
-      56: "showers-scattered",
-      57: "showers-scattered",
+      56: "freezing-rain",
+      57: "freezing-rain",
       61: "showers",
       63: "showers",
       65: "showers",
-      66: "showers-scattered",
-      67: "showers",
+      66: "freezing-rain",
+      67: "freezing-rain",
       71: "snow-scattered",
       73: "snow",
       75: "snow",
-      77: "hail",
+      77: "snow-rain",
       80: "showers",
       81: "showers",
       82: "showers",
@@ -293,41 +307,66 @@ Item {
       96: "storm",
       99: "storm"
     };
-    let iconName = "weather-" + (wmocodes[code] || "unknown");
 
-    // Use explicit isDay if provided; otherwise rely on DayOrNight component
+    // Icons that never use day/night variants
+    const baseIcons = new Set([
+      "showers-scattered",
+      "showers",
+      "snow-scattered",
+      "snow-rain",
+      "snow",
+      "storm",
+      "freezing-rain",
+      "overcast",
+      "hail",
+      "many-clouds",
+
+    ]);
+
+    let iconName = wmocodes[code] || "unknown";
+
     const dayStatus = (isDay !== null) ? isDay : determinateDay.isday;
-    return iconName + (dayStatus ? "" : "-night");
+
+    // Append -night only if allowed and a night variant exists
+    if (!dayStatus && ["clear", "few-clouds", "clouds"].includes(iconName)) {
+      iconName += "-night";
+    }
+
+    return "weather-" + iconName;
   }
+
 
   // Detailed text for weather condition
   function textWeather(x) {
     let text = {
       0: "Clear",
-      1: "Mainly clear",
-      2: "Partly cloudy",
+      1: "Mostly Clear",
+      2: "Partly Cloudy",
       3: "Overcast",
-      51: "Drizzle light intensity",
-      53: "Drizzle moderate intensity",
-      55: "Drizzle dense intensity",
-      56: "Freezing Drizzle light intensity",
-      57: "Freezing Drizzle dense intensity",
-      61: "Rain slight intensity",
-      63: "Rain moderate intensity",
-      65: "Rain heavy intensity",
-      66: "Freezing Rain light intensity",
-      67: "Freezing Rain heavy intensity",
-      71: "Snowfall slight intensity",
-      73: "Snowfall moderate intensity",
-      75: "Snowfall heavy intensity",
-      77: "Snow grains",
-      80: "Rain showers slight",
-      81: "Rain showers moderate",
-      82: "Rain showers violent",
-      85: "Snow showers slight",
-      86: "Snow showers heavy",
+      45: "Fog",
+      48: "Icy Fog",
+      51: "Light Drizzle",
+      53: "Drizzle",
+      55: "Heavy Drizzle",
+      56: "Light Freezing Drizzle",
+      57: "Freezing Drizzle",
+      61: "Light Rain",
+      63: "Rain",
+      65: "Heavy Rain",
+      66: "Light Freezing Rain",
+      67: "Freezing Rain",
+      71: "Light Snow",
+      73: "Snow",
+      75: "Heavy Snow",
+      77: "Snow Grains",
+      80: "Light Showers",
+      81: "Showers",
+      82: "Heavy Showers",
+      85: "Light Snow Showers",
+      86: "Snow Showers",
       95: "Thunderstorm",
-      96: "Thunderstorm with slight hail"
+      96: "Light Thunderstorm With Hail",
+      99: "Thunderstorm With Hail"
     };
     return text[x]
   }
@@ -339,6 +378,8 @@ Item {
       1: "Clear",
       2: "Cloudy",
       3: "Cloudy",
+      45: "Fog",
+      48: "Fog",
       51: "Drizzle",
       53: "Drizzle",
       55: "Drizzle",
@@ -487,12 +528,31 @@ Item {
         root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
         console.log(
           "Updated left panel to:",
-          root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor"
-        );
+          root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor");
 
         // Current weather
         tempCurrent = temperature(safeInt(dataweather, 1));
         console.log("Updated current temperature:", tempCurrent);
+
+        // Compute next forecast hours before emitting sync
+        const forecastHoursArr = [];
+        const nextHour = (now.getMinutes() === 0 ? currentHour : currentHour + 1) % 24;
+        for (let i = 0; i < 5; i++) {
+          forecastHoursArr.push((nextHour + i) % 24);
+        }
+
+        nextHours = forecastHoursArr;
+
+        // Log formatted hours
+        const formattedHours = forecastHoursArr.map(hour => {
+          if (timeFormat === 12) {
+            const h = hour % 12;
+            return (h === 0 ? 12 : h) + (hour < 12 ? " AM" : " PM");
+          } else {
+            return hour.toString().padStart(2, "0");
+          }
+        });
+        console.log("Next forecast hours:", formattedHours.join(", "));
 
         // Hourly forecast
         iconHours = [];
@@ -509,9 +569,7 @@ Item {
           tempHours.push(temperature(temp));
           iconHours.push(assignIcon(code, isDayAtTime) || "weather-unknown");
 
-          console.log(
-            `Hourly data +${i + 1}h => temp=${tempHours[i]}, icon=${iconHours[i]}`
-          );
+          console.log(`Hourly data +${i + 1}h => temp=${tempHours[i]}, icon=${iconHours[i]}`);
         }
 
         // Temperatures for coming days
@@ -541,14 +599,11 @@ Item {
         maxtempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
 
         console.log(
-          `Updated daily min/max for today: ${mintempToday}/${maxtempToday}`
-        );
+          `Updated daily min/max for today: ${mintempToday}/${maxtempToday}`);
         console.log(
-          `Updated daily min/max for tomorrow: ${mintempTomorrow}/${maxtempTomorrow}`
-        );
+          `Updated daily min/max for tomorrow: ${mintempTomorrow}/${maxtempTomorrow}`);
         console.log(
-          `Updated daily min/max for day after tomorrow: ${mintempDayAftertomorrow}/${maxtempDayAftertomorrow}`
-        );
+          `Updated daily min/max for day after tomorrow: ${mintempDayAftertomorrow}/${maxtempDayAftertomorrow}`);
 
         // Weather codes for coming days
         oneIcon = assignIcon(safeInt(dataweather, 27), true);
@@ -566,14 +621,15 @@ Item {
 
 
         console.log(
-          `Updated daily icon for tomorrow: ${assignIcon(safeInt(dataweather, 28), true)}`
-        );
+          `Updated daily icon for tomorrow: ${assignIcon(safeInt(dataweather, 28), true)}`);
         console.log(
-          `Updated daily icon for day after tomorrow: ${assignIcon(safeInt(dataweather, 29), true)}`
-        );
+          `Updated daily icon for day after tomorrow: ${assignIcon(safeInt(dataweather, 29), true)}`);
         console.log(
-          `Updated daily icon for two days after tomorrow: ${assignIcon(safeInt(dataweather, 30), true)}`
-        );
+          `Updated daily icon for two days after tomorrow: ${assignIcon(safeInt(dataweather, 30), true)}`);
+
+        // signal to main.qml for sync
+        weatherSynced()
+
       } else {
         console.warn("Weather update skipped: no dataweather available");
       }

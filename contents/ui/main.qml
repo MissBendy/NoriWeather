@@ -23,7 +23,8 @@ PlasmoidItem {
     property string unitsTemperature: plasmoid.configuration.temperatureUnit
     property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
     property string location: weatherData.city
-    property string weather: weatherData.weatherShottext
+    property string shortWeather: weatherData.weatherShortText
+    property string longWeather: weatherData.weatherLongText
     property string currentIcon: weatherData.iconCurrent
     property string currentMaxMin: weatherData.maxtempToday + "° / " + weatherData.mintempToday + "°"
     property var temps: weatherData.tempHours
@@ -49,122 +50,133 @@ PlasmoidItem {
         return tempDate.toLocaleString(Qt.locale(), "dddd")
     }
 
-    // Returns an array of next 5 forecast hours
+    // Returns an array of next forecast hours based on weatherData
     function getNextForecastHours() {
-        const now = new Date()
-        const nextHour = now.getMinutes() === 0 ? now.getHours() : now.getHours() + 1
-        const hours = []
+        if (!weatherData || !weatherData.tempHours) return []
 
-        for (let i = 0; i < 5; i++) {
-            hours.push((nextHour + i) % 24)  // wrap around 24h
-        }
+            const now = new Date()
+            const currentHour = now.getHours()
 
-        return hours
+            const nextHours = []
+
+            // Map the weatherData.tempHours array to actual forecast hours
+            for (let i = 0; i < weatherData.tempHours.length; i++) {
+                // Forecast hour = current hour + index + 1 (or wrap with 24)
+                nextHours.push((currentHour + i + 1) % 24)
+            }
+
+            return nextHours
     }
 
-    // Populate hourly forecast model
-    function hoursForecast() {
-        const forecastHoursArr = getNextForecastHours()
+    // Populate hourly forecast model using actual weatherData arrays
+    function hoursForecast(nextHours) {
         hoursWeatherModel.clear()
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < weatherData.tempHours.length; i++) {
             hoursWeatherModel.append({
-                icon: icons[i],
-                temp: temps[i],
-                hours: forecastHoursArr[i]
+                hours: nextHours[i],
+                icon: weatherData.iconHours[i],
+                temp: weatherData.tempHours[i]
             })
         }
     }
 
-    // Update hourly forecast model with new values
-    function hoursForecastUpdate() {
-        const forecastHoursArr = getNextForecastHours()
+    // Update hourly forecast model with new values using weatherData
+    function hoursForecastUpdate(nextHours) {
         for (let i = 0; i < hoursWeatherModel.count; i++) {
-            hoursWeatherModel.set(i, { "icon": icons[i], "temp": parseFloat(temps[i]), "hours": forecastHoursArr[i] })
+            hoursWeatherModel.set(i, {
+                hours: nextHours[i],
+                icon: weatherData.iconHours[i],
+                temp: parseFloat(weatherData.tempHours[i])
+            })
         }
     }
 
     // Update temperature units in all models
     function updateUnitsTempe() {
         const Maxs = [
-            weatherData.twoMax,
-            weatherData.threeMax,
-            weatherData.fourMax,
-            weatherData.fiveMax
+            weatherData.twoMax,     // Tomorrow
+            weatherData.threeMax,  // Day after tomorrow
+            weatherData.fourMax,  // Two days after tomorrow
+            weatherData.fiveMax, // Three days after tomorrow
+            weatherData.sixMax  // Four days after tomorrow
         ];
         const Mins = [
-            weatherData.twoMin,
-            weatherData.threeMin,
-            weatherData.fourMin,
-            weatherData.fiveMin
+            weatherData.twoMin,     // Tomorrow
+            weatherData.threeMin,  // Day after tomorrow
+            weatherData.fourMin,  // Two days after tomorrow
+            weatherData.fiveMin, // Three days after tomorrow
+            weatherData.sixMin  // Four days after tomorrow
         ];
 
+        // Update daily forecast temperatures
         for (let i = 0; i < forecastModel.count; i++) {
             forecastModel.set(i, { "maxTemp": Maxs[i], "minTemp": Mins[i] })
         }
 
+        // Update hourly forecast temperatures
         for (let i = 0; i < hoursWeatherModel.count; i++) {
             hoursWeatherModel.set(i, { "temp": parseFloat(temps[i]) })
         }
     }
 
-    // Timer to check for outdated weather data and trigger refresh
-    Timer {
-        id: checkUpdateTimer
-        interval: 5000
-        repeat: true
-        running: true
-        onTriggered: {
-            if (weatherData.lastUpdate !== "") {
-                const now = new Date()
-                const lastUpdateDate = new Date(weatherData.lastUpdate)
-                const diffMinutes = (now - lastUpdateDate) / 60000
-                if (diffMinutes > 5) forms()
-            }
+    // Sync when WeatherData signals an update
+    Connections {
+        target: weatherData
+        function onWeatherSynced() {
+            console.log("WeatherData sync: updating")
+            forms()
         }
     }
 
     // Populate daily forecast model
     function updateForecastModel() {
         const iconsArr = [
-            weatherData.twoIcon,
-            weatherData.threeIcon,
-            weatherData.fourIcon,
-            weatherData.fiveIcon
+            weatherData.twoIcon,     // Tomorrow
+            weatherData.threeIcon,  // Day after tomorrow
+            weatherData.fourIcon,  // Two days after tomorrow
+            weatherData.fiveIcon, // Three days after tomorrow
+            weatherData.sixIcon  // Four days after tomorrow
         ];
         const Maxs = [
-            weatherData.twoMax,
-            weatherData.threeMax,
-            weatherData.fourMax,
-            weatherData.fiveMax
+            weatherData.twoMax,     // Tomorrow
+            weatherData.threeMax,  // Day after tomorrow
+            weatherData.fourMax,  // Two days after tomorrow
+            weatherData.fiveMax, // Three days after tomorrow
+            weatherData.sixMax  // Four days after tomorrow
         ];
         const Mins = [
-            weatherData.twoMin,
-            weatherData.threeMin,
-            weatherData.fourMin,
-            weatherData.fiveMin
+            weatherData.twoMin,     // Tomorrow
+            weatherData.threeMin,  // Day after tomorrow
+            weatherData.fourMin,  // Two days after tomorrow
+            weatherData.fiveMin, // Three days after tomorrow
+            weatherData.sixMin  // Four days after tomorrow
         ];
 
-        forecastModel.clear();
-
-        // Start at 0, but use getTranslatedDayInitial(i + 1) to make first item "tomorrow"
-        for (let i = 0; i < 3; i++) {
-            forecastModel.append({
-                date: getTranslatedDayInitial(i + 1), // tomorrow, day after, etc.
-                                 icon: iconsArr[i],
-                                 maxTemp: Maxs[i],
-                                 minTemp: Mins[i]
-            });
-        }
+        // Clear and append daily forecast
+        forecastModel.clear()
+            for (let i = 0; i < 3; i++) {
+                forecastModel.append({
+                    date: getTranslatedDayInitial(i + 1), // tomorrow, day after, etc.
+                                     icon: iconsArr[i],
+                                     maxTemp: Maxs[i],
+                                     minTemp: Mins[i]
+                })
+            }
     }
 
     // Refresh all forecast data and mark as updated
     function forms() {
         currentDateTime = new Date()
+
+        // Precompute next forecast hours from weatherData
+        const nextHours = getNextForecastHours()
+
+        // Update hourly and daily models
         if (isUpdate) {
-            hoursForecastUpdate()
+            hoursForecastUpdate(nextHours)
             updateForecastModel()
         } else {
-            hoursForecast()
+            hoursForecast(nextHours)
             updateForecastModel()
             isUpdate = true
         }

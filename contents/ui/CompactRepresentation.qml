@@ -21,7 +21,7 @@ Item {
     readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
 
     // Conditional vertical alignment if weather text is inactive
-    property string undefanchors: activeweathershottext ? undefined : parent.verticalCenter
+    property string undefanchors: activeweatherShortText ? undefined : parent.verticalCenter
 
     // Configuration options from plasmoid
     property bool textweather: Plasmoid.configuration.displayWeatherInPanel
@@ -29,9 +29,9 @@ Item {
     property int fonssizes: Plasmoid.configuration.sizeFontConfig
 
     // Dynamic measurements and flags
-    property bool activeweathershottext: heightH > 34
+    property bool activeweatherShortText: heightH > 34
     property int heightH: wrapper.height
-    property var widthWidget: activeweathershottext ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
+    property var widthWidget: activeweatherShortText ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
@@ -107,11 +107,11 @@ Item {
                 id: wrapper_weathertext
                 height: shortweathertext.implicitHeight
                 width: shortweathertext.implicitWidth
-                visible: activeweathershottext && textweather
+                visible: activeweatherShortText && textweather
 
                 Label {
                     id: shortweathertext
-                    text: wrapper.weather
+                    text: wrapper.shortWeather
                     font.pixelSize: fonssizes
                     font.weight: boldconditions ? Font.DemiBold : Font.Medium
                     verticalAlignment: Text.AlignVCenter

@@ -2,6 +2,7 @@
 function obtainCoordinates(callback) {
     // API endpoint that returns latitude and longitude based on IP
     let url = "http://ip-api.com/json/?fields=lat,lon";
+    // console.log("Coordiantes API URL: ", url);
 
     // Create an asynchronous HTTP request
     let req = new XMLHttpRequest();

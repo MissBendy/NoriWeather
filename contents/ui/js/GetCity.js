@@ -3,7 +3,7 @@ function getNameCity(latitude, longitud, language, callback) {
     // Construct the reverse geocoding URL from OpenStreetMap's Nominatim API
     // "accept-language" defines the response language for location names
     let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitud}&accept-language=${language}`;
-    // console.log("Generated Location Data URL: ", url); // Debug: confirm generated URL
+    // console.log("Location API URL: ", url);
 
     // Create a new asynchronous HTTP request
     let req = new XMLHttpRequest();

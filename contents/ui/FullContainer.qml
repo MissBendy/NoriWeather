@@ -12,7 +12,14 @@ Item {
     property int spacingElements: 5
 
     // Dynamic width of left panel based on weather icon and temperature text
-    property int widthOfLeftPanel: logo.width + text.implicitWidth + 20
+    // Dynamic width of left panel
+    property int minLeftPanelWidth: 120
+    property int widthOfLeftPanel: {
+        const baseWidth = logo.width + text.implicitWidth + 20
+        const availableWidth = baseWidth - 15
+        const calculatedWidth = textDo.implicitWidth > availableWidth ? baseWidth + 12 : baseWidth
+        return Math.max(calculatedWidth, minLeftPanelWidth)
+    }
 
     // Left panel background container
     LeftPanel {
@@ -83,11 +90,11 @@ Item {
             Kirigami.Heading {
                 id: textDo
                 width: parent.width - leftPanel.marginLeftReal
-                text: wrapper.weather
+                text: wrapper.longWeather
                 color: Kirigami.Theme.textColor
                 level: 5
                 font.weight: Font.Medium
-                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
 
             // Max/Min temperature
