@@ -10,7 +10,7 @@ function getWeatherData(latitud, longitud, hours, callback) {
     // const endDate = end.toISOString().split('T')[0];
 
     // Build the API request URL
-    let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&models=ecmwf_ifs025`;
+    let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&models=ncep_nbm_conus`;
     //console.log("Weather API URL:", url);
 
     // Create a new XMLHttpRequest

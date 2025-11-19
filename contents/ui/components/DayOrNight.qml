@@ -122,10 +122,13 @@ Item {
     function updateDayStatus() {
         var now = new Date()
         var localMinutesNow = now.getHours() * 60 + now.getMinutes()
-        var adjustedNow = localMinutesNow
-        if (localMinutesNow < sunrise && now.getHours() < 3) adjustedNow += 1440
-            isday = adjustedNow >= sunrise && adjustedNow < sunset
+        var adjSunset = sunset
+        if (sunset < sunrise)
+            adjSunset += 1440
+
+            isday = localMinutesNow >= sunrise && localMinutesNow < adjSunset
     }
+
 
     // Check if a given hour (0–23) is during daytime
     function isDayForHour(hour) {

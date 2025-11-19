@@ -8,8 +8,7 @@ import "../js/GetCity.js" as GetCity
 Item {
   id: root
   signal dataChanged
-  signal simpleDataReady
-  signal weatherSynced()
+  signal weatherSynced
 
   // Extract a word by position from a string
   function obtain(text, index) {
@@ -161,10 +160,13 @@ Item {
   // React to coordinate changes and refresh data
   onObserverCoordenatesChanged: {
     if (latitude && longitud && latitude !== "0" && longitud !== "0") {
+      // Only fetch city if coordinates changed
+      if (latitude + longitud !== oldCompleteCoordinates) {
+        oldCompleteCoordinates = latitude + longitud;
+        getCityFunction();
+      }
       updateWeather(2);
-      getCityFunction();
     } else {
-      // console.warn("Invalid coordinates, retrying...");
       retryCoordinate.start();
     }
   }
@@ -189,11 +191,19 @@ Item {
 
       const now = new Date();
       const currentHour = now.getHours();
-      const isDayNow = determinateDay.isDayForHour(currentHour);
+      const currentMinute = now.getMinutes();
+
+      // total minutes since midnight
+      const currentMinutesTotal = currentHour * 60 + currentMinute;
+
+      // exact day/night using sunrise/sunset
+      const isDayNow = (currentMinutesTotal >= determinateDay.sunrise &&
+      currentMinutesTotal < determinateDay.sunset);
 
       // Current temperature and weather code
       tempCurrent = temperature(safeInt(dataweather, 1));
       iconCurrent = assignIcon(safeInt(dataweather, 16), isDayNow);
+
       // Daily temperatures min/max
       mintempToday = temperature(safeInt(dataweather, 2));
       maxtempToday = temperature(safeInt(dataweather, 9));
@@ -203,6 +213,7 @@ Item {
       maxtempDayAftertomorrow = temperature(safeInt(dataweather, 11));
       mintempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 5));
       maxtempTwoDaysAfterTomorrow = temperature(safeInt(dataweather, 12));
+
       // Daily weather icons
       codeweatherCurrent = safeString(dataweather, 16)
       codeweatherTomorrow = safeString(dataweather, 28);
@@ -211,12 +222,10 @@ Item {
 
       // Compute upcoming forecast hours
       const forecastHoursArr = [];
-      const nextHour = (now.getMinutes() === 0 ? currentHour : currentHour + 1) % 24;
-
+      const nextHour = (currentMinute === 0 ? currentHour : currentHour + 1) % 24;
       for (let i = 0; i < 5; i++) {
         forecastHoursArr.push((nextHour + i) % 24);
       }
-
       nextHours = forecastHoursArr;
 
       // Hourly temperatures (next 5 hours)
@@ -234,7 +243,7 @@ Item {
         iconHours.push(assignIcon(code, determinateDay.isDayForHour(forecastTime.getHours())));
       }
 
-      // Update UI panel colors and day/night state
+      // Update left panel color with day/night state
       root.isDay = isDayNow;
       root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
 
@@ -320,7 +329,6 @@ Item {
       "overcast",
       "hail",
       "many-clouds",
-
     ]);
 
     let iconName = wmocodes[code] || "unknown";
@@ -377,9 +385,9 @@ Item {
       0: "Clear",
       1: "Clear",
       2: "Cloudy",
-      3: "Cloudy",
+      3: "Overcast",
       45: "Fog",
-      48: "Fog",
+      48: "Icy Fog",
       51: "Drizzle",
       53: "Drizzle",
       55: "Drizzle",
@@ -393,7 +401,7 @@ Item {
       71: "Snow",
       73: "Snow",
       75: "Snow",
-      77: "Hail",
+      77: "Snow",
       80: "Showers",
       81: "Showers",
       82: "Showers",
@@ -412,7 +420,7 @@ Item {
       if (useCoordinatesIp === "true") {
         getCoordinatesWithIp();
       } else {
-        if (latitudeC === "0" || longitudC === "0") {
+        if (latitudeC === "0" || longitudeC === "0") {
           getCoordinatesWithIp();
         } else {
           getWeatherApi()
@@ -514,21 +522,26 @@ Item {
         updateWeather(2);
 
         //day and night UI updates
-
         determinateDay.fetchSunData();
 
-        const isDayNow = determinateDay.isDayForHour(currentHour);
-        console.log("Checking day/night status:", isDayNow ? "Day" : "Night");
+        // total minutes since midnight
+        const currentMinutesTotal = currentHour * 60 + currentMinute;
 
-        const currentCode = safeInt(dataweather, 16);
-        iconCurrent = assignIcon(currentCode, isDayNow);
-        console.log("Updated current icon to:", iconCurrent);
+        // exact day/night using sunrise/sunset
+        const isDayNow = (currentMinutesTotal >= determinateDay.sunrise &&
+        currentMinutesTotal < determinateDay.sunset);
 
+        // update only if day/night changed
         root.isDay = isDayNow;
         root.leftPanelColor = isDayNow ? root.dayColor : root.nightColor;
-        console.log(
-          "Updated left panel to:",
-          root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor");
+
+        // update current weather icon
+        const currentCode = safeInt(dataweather, 16);
+        iconCurrent = assignIcon(currentCode, isDayNow);
+
+        console.log("Day/night status updated:", isDayNow ? "Day" : "Night");
+        console.log("Updated left panel to:",root.leftPanelColor === root.dayColor ? "dayColor" : "nightColor");
+        console.log("Current icon:", iconCurrent);
 
         // Current weather
         tempCurrent = temperature(safeInt(dataweather, 1));
