@@ -1,4 +1,3 @@
-// Main QML item for a Plasma popup window with dynamic positioning and a background SVG
 /*
  *  SPDX-FileCopyrightText: zayronxio
  *  SPDX-License-Identifier: GPL-3.0-or-later
@@ -69,16 +68,19 @@ Item {
             }
         }
 
+        // Calculate popup position based on plasmoid edge and screen bounds
         function popupPosition(width, height) {
             var screen = Qt.application.primaryScreen ? Qt.application.primaryScreen.virtualGeometry : wrapper.screenGeometry;
             var panelH = wrapper.height;
             var panelW = wrapper.width;
             var appletTopLeft = parent.mapToGlobal(0, 0);
 
+            // Helper to create a point
             function calculatePosition(x, y) {
                 return Qt.point(x, y);
             }
 
+            // Clamp value to min/max
             function clamp(value, min, max) {
                 return Math.min(Math.max(value, min), max);
             }
@@ -89,6 +91,7 @@ Item {
             var x = 0;
             var y = 0;
 
+            // Determine position based on plasmoid edge
             switch (plasmoid.location) {
                 case PlasmaCore.Types.BottomEdge:
                     if (appletTopLeft.x < (screen.width - width / 2 + (backgroundSvg.margins ? backgroundSvg.margins.left : 0) + Kirigami.Units.gridUnit)) {
@@ -143,21 +146,22 @@ Item {
 
         FocusScope {
             id: rootItem
+            // Set minimum and maximum dimensions for the popup
             Layout.minimumWidth:  Kirigami.Units.gridUnit * 20
-            Layout.maximumWidth:  Kirigami.Units.gridUnit * 40
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 11
-            Layout.maximumHeight: Kirigami.Units.gridUnit * 25
+            Layout.maximumWidth:  Kirigami.Units.gridUnit * 20
+            Layout.minimumHeight: Kirigami.Units.gridUnit * 10.25
+            Layout.maximumHeight: Kirigami.Units.gridUnit * 10.25
             focus: true
 
             FullContainer {
                 id: fullContainer
+                // Set margins and height adjustments
                 leftPanelMargin: backgroundSvg.margins.left
                 topPanelMargin: backgroundSvg.margins.top
                 exedentHight: backgroundSvg.margins.top + backgroundSvg.margins.bottom
                 width: widthOfLeftPanel
                 height: parent.height
             }
-
             // Forecast item panel next to the full container
             ItemForecasts {
                 width: parent.width - fullContainer.width

@@ -32,7 +32,7 @@ Item {
   // UI color scheme for day and night
   property color dayColor: "#3DAAE4"
   property color nightColor: "#0D1B2A"
-  property color leftPanelColor: isDay ? dayColor : nightColor
+  property color leftPanelColor: true ? dayColor : nightColor
 
   // General state and configuration properties
   property bool isUpdate: false
@@ -137,9 +137,34 @@ Item {
   property string city: "unk"
   property string prefixIcon: determinateDay.isDayForHour(new Date().getHours()) ? "" : "-night"
 
-  // Initialize component
+  Timer {
+    id: onlineRetryTimer
+    interval: 5000   // retry every 5 seconds
+    running: false
+    repeat: true
+    onTriggered: checkOnlineAndUpdate()
+  }
+
+  function checkOnlineAndUpdate() {
+    var req = new XMLHttpRequest()
+    req.open("GET", "https://www.google.com/generate_204", true)
+    req.onreadystatechange = function () {
+      if (req.readyState === XMLHttpRequest.DONE) {
+        if (req.status >= 200 && req.status < 400) {
+          console.log("Network online, fetching weather")
+          updateWeather(1)           // fetch weather
+          onlineRetryTimer.stop()    // stop retrying once successful
+        } else {
+          console.log("Network Offline, will retry in 5s")
+          if (!onlineRetryTimer.running) onlineRetryTimer.start()
+        }
+      }
+    }
+    req.send()
+  }
+
   Component.onCompleted: {
-    updateWeather(1); // initial fetch of weather and coordinates
+    checkOnlineAndUpdate()   // first attempt immediately
   }
 
   // Day/night tracker
@@ -179,6 +204,7 @@ Item {
     }
     GetCity.getNameCity(latitude, longitud, languageCode, function(result) {
       city = result;
+      getWeatherApi();
       retrycity.start();
     });
   }
@@ -423,7 +449,7 @@ Item {
         if (latitudeC === "0" || longitudeC === "0") {
           getCoordinatesWithIp();
         } else {
-          getWeatherApi()
+          getCityFunction()
         }
       }
     }
@@ -593,10 +619,10 @@ Item {
         fiveMin: temperature(safeInt(dataweather, 6))
         sixMin: temperature(safeInt(dataweather, 7))
         sevenMin: temperature(safeInt(dataweather, 8))
-        neMax: temperature(safeInt(dataweather, 9))
+        oneMax: temperature(safeInt(dataweather, 9))
         twoMax: temperature(safeInt(dataweather, 10))
         threeMax: temperature(safeInt(dataweather, 11))
-        ourMax: temperature(safeInt(dataweather, 12))
+        fourMax: temperature(safeInt(dataweather, 12))
         fiveMax: temperature(safeInt(dataweather, 13))
         sixMax: temperature(safeInt(dataweather, 14))
         sevenMax: temperature(safeInt(dataweather, 15))

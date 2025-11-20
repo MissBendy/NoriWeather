@@ -1,5 +1,6 @@
 // QML item displaying hourly and daily weather forecasts using Kirigami components
 import QtQuick
+import QtQuick.Layouts 1.1
 import org.kde.kirigami as Kirigami
 
 Item {
@@ -67,55 +68,45 @@ Item {
     }
 
     // Bottom half: daily forecast
+
     Column {
         width: parent.width
-        height: parent.height / 2
         anchors.top: hourlyForecast.bottom
+        anchors.topMargin: -9
+        spacing: 2
 
-        // Repeat for each daily forecast entry
         Repeater {
             model: forecastFullModel
-            delegate: Row {
-                height: parent.height / 3
+            delegate: RowLayout {
                 width: parent.width
-                spacing: 6
 
-                // Day label
                 Kirigami.Heading {
                     id: day
-                    width: parent.width - logo.width - widthTxt - 16
-                    height: parent.height
-                    text: " " + model.date
+                    text: model.date
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                    Layout.preferredWidth: parent.width * 0.4
+                    Layout.leftMargin: 4    // distance from left edge
                     color: Kirigami.Theme.textColor
-                    verticalAlignment: Text.AlignVCenter
                     level: 5
                 }
 
-                // Daily weather icon
                 Kirigami.Icon {
                     id: logo
                     width: Kirigami.Units.iconSizes.medium
                     height: width
                     source: model.icon
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 }
 
-                // Max/Min temperature label
+
                 Kirigami.Heading {
                     id: forecastText
-                    width: widthTxt
-                    height: parent.height
                     text: model.maxTemp + "° / " + model.minTemp + "°"
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                    Layout.preferredWidth: parent.width * 0.25
+                    Layout.rightMargin: 4   // distance from right edge
                     color: Kirigami.Theme.textColor
-                    verticalAlignment: Text.AlignVCenter
                     level: 5
-                }
-
-                // Adjust widthTxt to fit the widest temperature text
-                Component.onCompleted: {
-                    if (forecastText.implicitWidth > widthTxt) {
-                        widthTxt = forecastText.implicitWidth
-                    }
                 }
             }
         }

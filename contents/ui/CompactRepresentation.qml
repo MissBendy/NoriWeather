@@ -1,4 +1,3 @@
-// QML item displaying weather icon and temperature, adapting to horizontal or vertical plasmoid layouts
 import QtQuick
 import QtQuick.Layouts 1.1
 import QtQuick.Controls
@@ -10,28 +9,32 @@ import org.kde.plasma.components 3.0 as PlasmaComponents3
 Item {
     id: iconAndTemp
 
+    // Set minimum dimensions for the layout
     Layout.minimumWidth: widthReal
     Layout.minimumHeight: heightReal
-
+    // Reference to the dashboard window for toggling
     property QtObject dashWindow: null
+    // Determine if the plasmoid is vertical
     readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-
-    // Conditional alignment toggle
+    // Conditional anchor toggle depending on active weather text visibility
     property var undefanchors: activeweatherShortText ? undefined : null
-
+    // User configuration properties
     property bool textweather: Plasmoid.configuration.displayWeatherInPanel
     property bool boldconditions: Plasmoid.configuration.fontBoldWeather
     property int fonssizes: Plasmoid.configuration.sizeFontConfig
-
+    // Determine if short weather text should be active
     property bool activeweatherShortText: heightH > 34
+    // Heights and widths for layout calculations
     property int heightH: wrapper.height
     property var widthWidget: activeweatherShortText ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
+    // Computed dimensions for horizontal and vertical layouts
     property int computedWidth: icon.implicitWidth + weatherInfoColumn.implicitWidth + icon.implicitWidth * 0.3
     property int computedHeight: icon_vertical.implicitHeight + tempValue_vertical.implicitHeight
 
+    // Mouse interaction to toggle dashboard window
     MouseArea {
         id: compactMouseArea
         anchors.fill: parent
@@ -47,6 +50,7 @@ Item {
         spacing: icon.implicitWidth / 5
         visible: !isVertical
 
+        // Weather icon
         Kirigami.Icon {
             id: icon
             width: iconAndTemp.height < 17 ? 16 : iconAndTemp.height < 24 ? 22 : 24
@@ -56,6 +60,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
         }
 
+        // Column holding temperature and optional weather text
         Column {
             id: weatherInfoColumn
             width: widthWidget
@@ -68,6 +73,7 @@ Item {
                 height: tempValue.implicitHeight
                 Layout.alignment: Qt.AlignVCenter
 
+                // Temperature value
                 Label {
                     id: tempValue
                     height: parent.height
@@ -78,6 +84,8 @@ Item {
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                 }
+
+                // Temperature unit
                 Label {
                     id: tempUnit
                     height: parent.height
@@ -91,6 +99,7 @@ Item {
                 }
             }
 
+            // Optional short weather description
             Item {
                 id: wrapper_weathertext
                 height: shortweathertext.implicitHeight
@@ -115,6 +124,8 @@ Item {
         height: computedHeight
         spacing: 2
         visible: isVertical
+
+        // Weather icon
         Kirigami.Icon {
             id: icon_vertical
             width: wrapper.width < 17 ? 16 : wrapper.width < 24 ? 22 : 24
@@ -130,6 +141,7 @@ Item {
             height: tempValue_vertical.implicitHeight
             Layout.alignment: Qt.AlignHCenter
 
+            // Temperature value
             Label {
                 id: tempValue_vertical
                 height: parent.height
@@ -139,6 +151,8 @@ Item {
                 color: PlasmaCore.Theme.textColor
                 horizontalAlignment: Text.AlignHCenter
             }
+
+            // Temperature unit
             Label {
                 id: tempUnit_vertical
                 height: parent.height
@@ -151,6 +165,7 @@ Item {
         }
     }
 
+    // Initialize dashboard window and connect activation signal
     Component.onCompleted: {
         dashWindow = Qt.createQmlObject("Representation {}", wrapper)
         plasmoid.activated.connect(function() {
