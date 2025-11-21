@@ -101,12 +101,39 @@ Item {
 
                 Kirigami.Heading {
                     id: forecastText
-                    text: model.maxTemp + "° / " + model.minTemp + "°"
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                     Layout.preferredWidth: parent.width * 0.25
-                    Layout.rightMargin: 4   // distance from right edge
+                    Layout.rightMargin: 4
                     color: Kirigami.Theme.textColor
                     level: 5
+
+                    RowLayout {
+                        anchors.fill: parent
+                        spacing: 0
+
+                        Kirigami.Heading {
+                            text: model.maxTemp + "°"
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                            color: Kirigami.Theme.textColor
+                            level: 5
+                        }
+
+                        Kirigami.Heading {
+                            text: " / "
+                            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                            color: Kirigami.Theme.textColor
+                            level: 5
+                        }
+
+                        Kirigami.Heading {
+                            text: model.minTemp + "°"
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
+                            color: Kirigami.Theme.textColor
+                            level: 5
+                        }
+                    }
                 }
             }
         }
