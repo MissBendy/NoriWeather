@@ -22,6 +22,7 @@ PlasmoidItem {
     property string currentTemp: weatherData.tempCurrent
     property string unitsTemperature: plasmoid.configuration.temperatureUnit
     property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
+    property int weatherModel: plasmoid.configuration.weatherModel
     property string location: weatherData.city
     property string shortWeather: weatherData.weatherShortText
     property string longWeather: weatherData.weatherLongText

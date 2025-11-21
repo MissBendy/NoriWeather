@@ -1,5 +1,5 @@
 // Fetches detailed weather data (current, next 5-hourly, and 7-day daily forecast) from the Open-Meteo API
-function getWeatherData(latitud, longitud, hours, callback) {
+function getWeatherData(latitud, longitud, hours, model, callback) {
     // Calculate start and end dates for a 7-day forecast
     const start = new Date();
     const end = new Date();
@@ -10,8 +10,8 @@ function getWeatherData(latitud, longitud, hours, callback) {
     // const endDate = end.toISOString().split('T')[0];
 
     // Build the API request URL
-    let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&models=ncep_nbm_conus`; // use models=ecmwf_ifs025 for EU
-    //console.log("Weather API URL:", url);
+    let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&models=${model}`;
+    // console.log("Weather API URL:", url);
 
     // Create a new XMLHttpRequest
     let req = new XMLHttpRequest();

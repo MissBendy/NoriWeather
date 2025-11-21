@@ -13,15 +13,17 @@ Item {
 
     // Helper objects to store values for temperature unit, font size, and time format
     QtObject { id: fontsizeValue; property var value }
-    QtObject { id: unidWeatherValue; property var value }
+    QtObject { id: unitWeatherValue; property var value }
     QtObject { id: timeFormatValue; property var value }
+    QtObject { id: weatherModel; property var value }
 
     // Configuration property aliases connected to UI controls
     property alias cfg_coordinatesIP: coordinatesIP.checked
     property alias cfg_displayWeatherInPanel: displayWeather.checked
     property alias cfg_manualLatitude: latitude.text
     property alias cfg_manualLongitude: longitude.text
-    property alias cfg_temperatureUnit: unidWeatherValue.value
+    property alias cfg_temperatureUnit: unitWeatherValue.value
+    property alias cfg_weatherModel: weatherModel.value
     property alias cfg_timeFormat: timeFormatValue.value
     property alias cfg_sizeFontConfig: fontsizeValue.value
     property alias cfg_fontBoldWeather: boldWeather.checked
@@ -112,8 +114,38 @@ Item {
                     { text: i18n("Celsius (°C)"), value: 0 },
                     { text: i18n("Fahrenheit (°F)"), value: 1 }
                 ]
-                onActivated: unidWeatherValue.value = currentValue
-                Component.onCompleted: currentIndex = indexOfValue(unidWeatherValue.value)
+                onActivated: unitWeatherValue.value = currentValue
+                Component.onCompleted: currentIndex = indexOfValue(unitWeatherValue.value)
+            }
+
+            // Weather model selection
+            Label {
+                Layout.minimumWidth: root.width / 2
+                text: i18n("Weather Model") + ":"
+                horizontalAlignment: Label.AlignRight
+            }
+            ComboBox {
+                id: weatherModelComboBox
+                textRole: "text"
+                valueRole: "value"
+
+                model: [
+                    // Best match
+                    { text: i18n("Best Match"), value: 1 },
+                    // ECMWF
+                    { text: i18n("ECMWF IFS 0.25°"), value: 2 },
+                    { text: i18n("ECMWF IFS HRES 9km"), value: 3 },
+                    // NOAA NCEP
+                    { text: i18n("NCEP GFS Seamless"), value: 4 },
+                    { text: i18n("NCEP GFS Global 0.11°/0.25°"), value: 5 },
+                    { text: i18n("NCEP NBM U.S. Conus"), value: 6 },
+                    // UK Met Office
+                    { text: i18n("UK Met Office Seamless"), value: 7 },
+                    { text: i18n("UK Met Office Global 10km"), value: 8 },
+                ]
+
+                onActivated: weatherModel.value = currentValue
+                Component.onCompleted: currentIndex = indexOfValue(weatherModel.value)
             }
 
             // Font size selection
@@ -144,5 +176,18 @@ Item {
                 Component.onCompleted: currentIndex = indexOfValue(fontsizeValue.value)
             }
         }
+    }
+
+    // Bottom-pinned note
+    Label {
+        id: bottomNote
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Kirigami.Units.largeSpacing
+        wrapMode: Text.WordWrap
+        text: i18n("Note:\nThe default weather model 'Best Match' provides the best forecast for any given location worldwide.\nSeamless combines all models from a given provider into a seamless prediction.")
+        font.italic: true
+        horizontalAlignment: Text.AlignLeft
     }
 }

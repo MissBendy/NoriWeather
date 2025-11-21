@@ -48,6 +48,8 @@ Item {
   property string longitudeC: plasmoid.configuration.manualLongitude
   property string temperatureUnit: plasmoid.configuration.temperatureUnit
   property int timeFormat: plasmoid.configuration.timeFormat  // 12 or 24
+  property int weatherModel: plasmoid.configuration.weatherModel
+  property string apiModel: ""
 
   // Determine final coordinates (manual or IP-based)
   property string latitude: (useCoordinatesIp === "true") ? latitudeIP : (latitudeC === "0") ? latitudeIP : latitudeC
@@ -211,7 +213,51 @@ Item {
 
   // Fetch current weather data
   function getWeatherApi() {
-    GetInfoApi.getWeatherData(latitude, longitud, 5, function(result) { // '5' = next 5 hours
+    // Map integer to API string
+    switch (weatherModel) {
+
+      // Best
+      case 1:
+        apiModel = "best_match";
+        break;
+        // ECMWF
+      case 2:
+        apiModel = "ecmwf_ifs025";
+        break;
+      case 3:
+        apiModel = "ecmwf_ifs";
+        break;
+        // NOAA NCEP
+      case 4:
+        apiModel = "gfs_seamless";
+        break;
+      case 5:
+        apiModel = "gfs_global";
+        break;
+      case 6:
+        apiModel = "ncep_nbm_conus";
+        break;
+        // UK Met Office
+      case 7:
+        apiModel = "ukmo_seamless";
+        break;
+      case 8:
+        apiModel = "ukmo_global_deterministic_10km";
+        break;
+
+      default:
+        console.error("Invalid weather model:", weatherModel);
+        return;
+    }
+     // console.log("Weather model:", apiModel);
+
+     if (!latitude || !longitud || latitude === "0" || longitud === "0") {
+       // console.warn("Coordinates invalid, will retry");
+       retryCoordinate.start();
+       return;
+     }
+
+    GetInfoApi.getWeatherData(latitude, longitud, 5, apiModel, function(result) { // '5' = next 5 hours
       if (isUpdate) newValuesWeather = result;
       else dataweather = result;
 
@@ -689,6 +735,11 @@ Item {
       updateWeather(1);
       isInExecution = true
     }
+  }
+
+  // update apiModel if weather model changes
+  onWeatherModelChanged: {
+    getWeatherApi()
   }
 
   // Recalculate displayed temperature when unit preference changes
