@@ -15,18 +15,22 @@
     <entry name="manualLatitude" type="string">
       <default>0</default>
     </entry>
-
     <entry name="manualLongitude" type="string">
       <default>0</default>
     </entry>
 
+    <entry name="timeFormat" type="Int">
+      <default>12</default>
+    </entry>
     <entry name="temperatureUnit" type="Int">
-      <default>0</default>
+      <default>1</default>
+    </entry>
+    <entry name="weatherModel" type="Int">
+      <default>6</default>
     </entry>
     <entry name="sizeFontConfig" type="Int">
-      <default>11</default>
+      <default>13</default>
     </entry>
-
     <entry name="fontBoldWeather" type="Bool">
     <default>true</default>
     </entry>

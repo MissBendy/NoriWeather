@@ -1,144 +1,163 @@
 import QtQuick
 import QtQuick.Layouts 1.1
 import QtQuick.Controls
-import org.kde.plasma.plasmoid
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.core as PlasmaCore
+import org.kde.plasma.plasmoid
 import org.kde.plasma.components 3.0 as PlasmaComponents3
-//import org.kde.plasma.plasma5support as Plasma5Support
-
 
 Item {
-    id: iconAndTem
+    id: iconAndTemp
 
+    // Set minimum dimensions for the layout
     Layout.minimumWidth: widthReal
     Layout.minimumHeight: heightReal
-
+    // Reference to the dashboard window for toggling
     property QtObject dashWindow: null
-
+    // Determine if the plasmoid is vertical
     readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
-    property string undefanchors: activeweathershottext ? undefined : parent.verticalCenter
+    // Conditional anchor toggle depending on active weather text visibility
+    property var undefanchors: activeweatherShortText ? undefined : null
+    // User configuration properties
     property bool textweather: Plasmoid.configuration.displayWeatherInPanel
-    property bool activeweathershottext: heightH > 34
+    property bool boldconditions: Plasmoid.configuration.fontBoldWeather
     property int fonssizes: Plasmoid.configuration.sizeFontConfig
+    // Determine if short weather text should be active
+    property bool activeweatherShortText: heightH > 34
+    // Heights and widths for layout calculations
     property int heightH: wrapper.height
-    property var widthWidget: activeweathershottext ? temOfCo.implicitWidth : temOfCo.implicitWidth + wrapper_weathertext.width
+    property var widthWidget: activeweatherShortText ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
+    // Computed dimensions for horizontal and vertical layouts
+    property int computedWidth: icon.implicitWidth + weatherInfoColumn.implicitWidth + icon.implicitWidth * 0.3
+    property int computedHeight: icon_vertical.implicitHeight + tempValue_vertical.implicitHeight
 
-
+    // Mouse interaction to toggle dashboard window
     MouseArea {
         id: compactMouseArea
         anchors.fill: parent
-
         hoverEnabled: true
-
-        onClicked: {
-
-            dashWindow.visible = !dashWindow.visible;
-
-        }
+        onClicked: dashWindow.visible = !dashWindow.visible
     }
+
+    // Horizontal layout
     RowLayout {
         id: initial
-        width: icon.width + columntemandweathertext.width + icon.width * 0.3
+        width: computedWidth
         height: parent.height
-        spacing: icon.width / 5
+        spacing: icon.implicitWidth / 5
         visible: !isVertical
+
+        // Weather icon
         Kirigami.Icon {
             id: icon
-            width: root.height < 17 ? 16 : root.height < 24 ? 22 : 24
+            width: iconAndTemp.height < 17 ? 16 : iconAndTemp.height < 24 ? 22 : 24
             height: width
             source: wrapper.currentIcon
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
             roundToIconSize: false
+            Layout.alignment: Qt.AlignVCenter
         }
-        Column {
-            id: columntemandweathertext
-            width: widthWidget
-            height: temOfCo.implicitHeight
-            anchors.verticalCenter: parent.verticalCenter
-            Row {
-                id: temOfCo
-                width: textGrados.implicitWidth + subtextGrados.implicitWidth
-                height: textGrados.implicitHeight
-                anchors.verticalCenter: undefanchors
 
+        // Column holding temperature and optional weather text
+        Column {
+            id: weatherInfoColumn
+            width: widthWidget
+            height: temperatureRow.implicitHeight
+            Layout.alignment: Qt.AlignVCenter
+
+            Row {
+                id: temperatureRow
+                width: tempValue.implicitWidth + tempUnit.implicitWidth
+                height: tempValue.implicitHeight
+                Layout.alignment: Qt.AlignVCenter
+
+                // Temperature value
                 Label {
-                    id: textGrados
+                    id: tempValue
                     height: parent.height
-                    width: parent.width - subtextGrados.implicitWidth
+                    width: parent.width - tempUnit.implicitWidth
                     text: wrapper.currentTemp
-                    font.bold: boldfonts
-                    font.pixelSize: fonssizes
+                    font.weight: Font.Medium
                     color: PlasmaCore.Theme.textColor
                     horizontalAlignment: Text.AlignLeft
                     verticalAlignment: Text.AlignVCenter
                 }
+
+                // Temperature unit
                 Label {
-                    id: subtextGrados
+                    id: tempUnit
                     height: parent.height
-                    width: parent.width - textGrados.implicitWidth
-                    text: (wrapper.unitsTemperature === "0") ? " °C " : " °F "
-                    horizontalAlignment: Text.AlignLeft
-                    font.bold: boldfonts
+                    width: parent.width - tempValue.implicitWidth
+                    text: (wrapper.unitsTemperature === "0") ? "°C" : "°F"
+                    font.weight: Font.Medium
                     font.pixelSize: fonssizes
                     color: PlasmaCore.Theme.textColor
                     verticalAlignment: Text.AlignVCenter
+                    horizontalAlignment: Text.AlignLeft
                 }
             }
+
+            // Optional short weather description
             Item {
                 id: wrapper_weathertext
                 height: shortweathertext.implicitHeight
                 width: shortweathertext.implicitWidth
-                visible: activeweathershottext & textweather
+                visible: activeweatherShortText && textweather
+
                 Label {
                     id: shortweathertext
-                    text: wrapper.weather
+                    text: wrapper.shortWeather
                     font.pixelSize: fonssizes
-                    font.bold: true
+                    font.weight: boldconditions ? Font.Medium : Font.Normal
                     verticalAlignment: Text.AlignVCenter
                 }
             }
         }
     }
+
+    // Vertical layout
     ColumnLayout {
         id: wrapper_vertical
-        width: root.width
-        height: icon_vertical.height +  textGrados_vertical.implicitHeight
+        width: iconAndTemp.width
+        height: computedHeight
         spacing: 2
         visible: isVertical
+
+        // Weather icon
         Kirigami.Icon {
             id: icon_vertical
             width: wrapper.width < 17 ? 16 : wrapper.width < 24 ? 22 : 24
             height: wrapper.width < 17 ? 16 : wrapper.width < 24 ? 22 : 24
             source: wrapper.currentIcon
-            anchors.left: parent.left
-            anchors.right: parent.right
             roundToIconSize: false
+            Layout.alignment: Qt.AlignHCenter
         }
+
         Row {
-            id: temOfCo_vertical
-            width: textGrados_vertical.implicitWidth + subtextGrados_vertical.implicitWidth
-            height: textGrados_vertical.implicitHeight
+            id: temperatureRow_vertical
+            width: tempValue_vertical.implicitWidth + tempUnit_vertical.implicitWidth
+            height: tempValue_vertical.implicitHeight
             Layout.alignment: Qt.AlignHCenter
 
+            // Temperature value
             Label {
-                id: textGrados_vertical
+                id: tempValue_vertical
                 height: parent.height
                 text: wrapper.currentTemp
-                font.bold: boldfonts
+                font.weight: boldconditions ? Font.DemiBold : Font.Medium
                 font.pixelSize: fonssizes
                 color: PlasmaCore.Theme.textColor
                 horizontalAlignment: Text.AlignHCenter
             }
+
+            // Temperature unit
             Label {
-                id: subtextGrados_vertical
+                id: tempUnit_vertical
                 height: parent.height
                 text: (wrapper.unitsTemperature === "0") ? " °C" : " °F"
-                font.bold: boldfonts
+                font.weight: boldconditions ? Font.DemiBold : Font.Medium
                 font.pixelSize: fonssizes
                 color: PlasmaCore.Theme.textColor
                 horizontalAlignment: Text.AlignHCenter
@@ -146,14 +165,13 @@ Item {
         }
     }
 
+    // Initialize dashboard window and connect activation signal
     Component.onCompleted: {
-        dashWindow = Qt.createQmlObject("Representation {}", wrapper);
+        dashWindow = Qt.createQmlObject("Representation {}", wrapper)
         plasmoid.activated.connect(function() {
             dashWindow.plasmoidWidV = widthReal
             dashWindow.plasmoidWidH = heightReal
-            dashWindow.visible = !dashWindow.visible;
-        });
-
+            dashWindow.visible = !dashWindow.visible
+        })
     }
-
 }
