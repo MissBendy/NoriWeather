@@ -26,7 +26,7 @@
       <default>1</default>
     </entry>
     <entry name="weatherModel" type="Int">
-      <default>6</default>
+      <default>1</default>
     </entry>
     <entry name="sizeFontConfig" type="Int">
       <default>13</default>
