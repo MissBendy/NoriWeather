@@ -33,9 +33,6 @@ Item {
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
-    // Computed dimensions for horizontal and vertical layouts
-    property int computedWidth: icon.implicitWidth + weatherInfoColumn.implicitWidth + icon.implicitWidth * 0.3
-    property int computedHeight: icon_vertical.implicitHeight + tempValue_vertical.implicitHeight
 
     // Mouse interaction to toggle dashboard window
     MouseArea {
@@ -48,7 +45,6 @@ Item {
     // Horizontal layout
     RowLayout {
         id: initial
-        width: computedWidth
         spacing: icon.implicitWidth / 5
         anchors.centerIn: parent
         visible: !isVertical
