@@ -49,7 +49,7 @@ Item {
                     // Weather icon for the hour
                     Kirigami.Icon {
                         source: model.icon
-                        width: Kirigami.Units.iconSizes.mediumLarge
+                        width: Kirigami.Units.iconSizes.medium
                         height: width
                         anchors.horizontalCenter: parent.horizontalCenter
                     }

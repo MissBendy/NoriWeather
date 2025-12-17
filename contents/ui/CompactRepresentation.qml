@@ -8,6 +8,8 @@ import org.kde.plasma.components 3.0 as PlasmaComponents3
 
 Item {
     id: iconAndTemp
+    anchors.fill: parent
+    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
     // Set minimum dimensions for the layout
     Layout.minimumWidth: widthReal
@@ -23,10 +25,11 @@ Item {
     property bool boldconditions: Plasmoid.configuration.fontBoldWeather
     property int fonssizes: Plasmoid.configuration.sizeFontConfig
     // Determine if short weather text should be active
-    property bool activeweatherShortText: heightH > 34
+    property bool activeweatherShortText: !isVertical
     // Heights and widths for layout calculations
     property int heightH: wrapper.height
-    property var widthWidget: activeweatherShortText ? temperatureRow.implicitWidth : temperatureRow.implicitWidth + wrapper_weathertext.width
+    property var widthWidget: temperatureRow.implicitWidth +
+    (textweather ? wrapper_weathertext.implicitWidth : 0)
     property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
     property var heightReal: isVertical ? hVerti : wrapper.height
@@ -46,14 +49,14 @@ Item {
     RowLayout {
         id: initial
         width: computedWidth
-        height: parent.height
         spacing: icon.implicitWidth / 5
+        anchors.centerIn: parent
         visible: !isVertical
 
         // Weather icon
         Kirigami.Icon {
             id: icon
-            width: iconAndTemp.height < 17 ? 16 : iconAndTemp.height < 24 ? 22 : 24
+            width: Kirigami.Units.iconSizes.medium
             height: width
             source: wrapper.currentIcon
             roundToIconSize: false
@@ -64,7 +67,6 @@ Item {
         Column {
             id: weatherInfoColumn
             width: widthWidget
-            height: temperatureRow.implicitHeight
             Layout.alignment: Qt.AlignVCenter
 
             Row {
@@ -121,15 +123,15 @@ Item {
     ColumnLayout {
         id: wrapper_vertical
         width: iconAndTemp.width
-        height: computedHeight
+        anchors.centerIn: parent
         spacing: 2
         visible: isVertical
 
         // Weather icon
         Kirigami.Icon {
             id: icon_vertical
-            width: wrapper.width < 17 ? 16 : wrapper.width < 24 ? 22 : 24
-            height: wrapper.width < 17 ? 16 : wrapper.width < 24 ? 22 : 24
+            width: Kirigami.Units.iconSizes.medium
+            height: width
             source: wrapper.currentIcon
             roundToIconSize: false
             Layout.alignment: Qt.AlignHCenter
