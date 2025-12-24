@@ -68,18 +68,19 @@ Item {
     }
 
     // Bottom half: daily forecast
-
     Column {
         width: parent.width
         anchors.top: hourlyForecast.bottom
         anchors.topMargin: -9
         spacing: 2
 
+        // Repeat for each daily forecast entry
         Repeater {
             model: forecastFullModel
             delegate: RowLayout {
                 width: parent.width
 
+                // Day of the week
                 Kirigami.Heading {
                     id: day
                     text: model.date
@@ -90,6 +91,7 @@ Item {
                     level: 5
                 }
 
+                // Weather icon for the day
                 Kirigami.Icon {
                     id: logo
                     width: Kirigami.Units.iconSizes.medium
@@ -99,6 +101,7 @@ Item {
                 }
 
 
+                // Temperature display
                 Kirigami.Heading {
                     id: forecastText
                     Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
@@ -113,6 +116,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         spacing: 0
 
+                        // Max temperature
                         Item {
                             Layout.preferredWidth: 20
                             Layout.alignment: Qt.AlignVCenter
@@ -123,6 +127,7 @@ Item {
                             }
                         }
 
+                        // Temperature Separator "/"
                         Kirigami.Heading {
                             text: "/"
                             level: 5
@@ -130,6 +135,7 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                         }
 
+                        // Min temperature
                         Item {
                             Layout.preferredWidth: 20
                             Layout.alignment: Qt.AlignVCenter
