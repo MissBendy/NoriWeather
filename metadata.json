@@ -3,19 +3,16 @@
     "KPlugin": {
         "Authors": [
             {
-                "Email": "adolfo@librepixels.com",
-                "Name": "zayronxio"
+                "Name": "MissBendy"
             }
         ],
-        "BugReportUrl": "",
+        "BugReportUrl": "https://github.com/MissBendy/NoriWeather/issues",
         "Category": "Environment and Weather",
-        "Description": "",
-        "EnabledByDefault": true,
+        "Description": "Provides hourly and daily weather forecasts",
         "Icon": "weather",
-        "Id": "Nori.Weather",
+        "Id": "KDE.Weather",
         "License": "GPL-2.0+",
-        "Name": "Nori Weather",
-        "Website": "https://store.kde.org/p/2230382/"
+        "Name": "KDE Weather",
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

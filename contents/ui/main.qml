@@ -1,8 +1,8 @@
 // Main Plasmoid item managing weather data and forecasts
 import QtQuick
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts
 import org.kde.plasma.plasmoid
-import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.core as PlasmaCore
 import "components" as Components
 import org.kde.kirigami as Kirigami
 import org.kde.ksvg as KSvg

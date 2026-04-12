@@ -29,10 +29,13 @@
       <default>1</default>
     </entry>
     <entry name="sizeFontConfig" type="Int">
-      <default>13</default>
+      <default></default>
     </entry>
-    <entry name="fontBoldWeather" type="Bool">
-    <default>true</default>
+    <entry name="fontWeight" type="Int">
+      <default></default>
+    </entry>
+    <entry name="fontFamily" type="String">
+      <default></default>
     </entry>
   </group>
 </kcfg>

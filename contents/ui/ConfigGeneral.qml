@@ -2,22 +2,35 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import org.kde.kirigami as Kirigami
-import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.core as PlasmaCore
+import Qt.labs.platform as Platform
 
 Item {
     id: root
 
-    // Signal emitted when any configuration changes
     signal configurationChanged
 
-    // Helper objects to store values for temperature unit, font size, and time format
-    QtObject { id: fontsizeValue; property var value }
     QtObject { id: unitWeatherValue; property var value }
     QtObject { id: timeFormatValue; property var value }
     QtObject { id: weatherModel; property var value }
 
-    // Configuration property aliases connected to UI controls
+    QtObject {
+        id: fontFamilyValue
+        property string value: ""
+    }
+
+    QtObject {
+        id: fontsizeValue
+        property var value: Qt.application.font.pointSize
+    }
+
+    QtObject {
+        id: fontWeightValue
+        property var value: Qt.application.font.weight
+    }
+
     property alias cfg_coordinatesIP: coordinatesIP.checked
     property alias cfg_displayWeatherInPanel: displayWeather.checked
     property alias cfg_manualLatitude: latitude.text
@@ -26,67 +39,87 @@ Item {
     property alias cfg_weatherModel: weatherModel.value
     property alias cfg_timeFormat: timeFormatValue.value
     property alias cfg_sizeFontConfig: fontsizeValue.value
-    property alias cfg_fontBoldWeather: boldWeather.checked
+    property alias cfg_fontFamily: fontFamilyValue.value
+    property alias cfg_fontWeight: fontWeightValue.value
 
-    // Main vertical layout
+    Platform.FontDialog {
+        id: fontDialog
+        title: i18n("Choose a Font")
+        modality: Qt.WindowModal
+        parentWindow: root.Window.window
+
+        property font fontChosen: Qt.font({
+            family: fontFamilyValue.value !== ""
+            ? fontFamilyValue.value
+            : Qt.application.font.family,
+            pointSize: fontsizeValue.value > 0
+            ? fontsizeValue.value
+            : Qt.application.font.pointSize,
+            weight: fontWeightValue.value > 0
+            ? fontWeightValue.value
+            : Qt.application.font.weight
+        })
+
+        onAccepted: {
+            fontFamilyValue.value = font.family
+            fontsizeValue.value = font.pointSize
+            fontWeightValue.value = font.weight
+            root.configurationChanged()
+        }
+    }
+
     ColumnLayout {
         id: mainColumn
+        anchors.fill: parent
         spacing: Kirigami.Units.largeSpacing
-        Layout.fillWidth: true
 
-        // Grid layout for individual settings
         GridLayout {
             id: settingsGrid
             columns: 2
+            Layout.fillWidth: true
 
-            // Use IP-based coordinates
             Label {
-                id: useIPlocation
-                Layout.minimumWidth: root.width / 2
                 text: i18n("Use geographical coordinates from the IP") + ":"
-                horizontalAlignment: Label.AlignRight
+                Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
             }
             CheckBox { id: coordinatesIP }
 
-            // Manual latitude input (shown if IP coordinates not used)
             Label {
-                Layout.minimumWidth: root.width / 2
                 text: i18n("Latitude") + ":"
-                visible: !coordinatesIP.checked
-                horizontalAlignment: Label.AlignRight
-            }
-            TextField { id: latitude; visible: !coordinatesIP.checked; width: 110 }
-
-            // Manual longitude input (shown if IP coordinates not used)
-            Label {
                 Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
+                visible: !coordinatesIP.checked
+            }
+            TextField {
+                id: latitude
+                visible: !coordinatesIP.checked
+                width: 110
+            }
+
+            Label {
                 text: i18n("Longitude") + ":"
-                visible: !coordinatesIP.checked
-                horizontalAlignment: Label.AlignRight
-            }
-            TextField { id: longitude; visible: !coordinatesIP.checked; width: 110 }
-
-            // Display weather on panel
-            Label {
                 Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
+                visible: !coordinatesIP.checked
+            }
+            TextField {
+                id: longitude
+                visible: !coordinatesIP.checked
+                width: 110
+            }
+
+            Label {
                 text: i18n("Display weather conditions on the panel") + ":"
-                horizontalAlignment: Label.AlignRight
+                Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
             }
             CheckBox { id: displayWeather }
 
-            // Bold weather text option
             Label {
-                Layout.minimumWidth: root.width / 2
-                text: i18n("Bold weather conditions on the panel") + ":"
-                horizontalAlignment: Label.AlignRight
-            }
-            CheckBox { id: boldWeather }
-
-            // Time format selection
-            Label {
-                Layout.minimumWidth: root.width / 2
                 text: i18n("Time format") + ":"
-                horizontalAlignment: Label.AlignRight
+                Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
             }
             ComboBox {
                 id: timeFormatComboBox
@@ -100,11 +133,10 @@ Item {
                 Component.onCompleted: currentIndex = indexOfValue(timeFormatValue.value)
             }
 
-            // Temperature unit selection
             Label {
-                Layout.minimumWidth: root.width / 2
                 text: i18n("Temperature unit") + ":"
-                horizontalAlignment: Label.AlignRight
+                Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
             }
             ComboBox {
                 id: unitComboBox
@@ -118,75 +150,134 @@ Item {
                 Component.onCompleted: currentIndex = indexOfValue(unitWeatherValue.value)
             }
 
-            // Weather model selection
             Label {
-                Layout.minimumWidth: root.width / 2
                 text: i18n("Weather Model") + ":"
-                horizontalAlignment: Label.AlignRight
+                Layout.minimumWidth: root.width / 2
+                horizontalAlignment: Text.AlignRight
             }
             ComboBox {
                 id: weatherModelComboBox
                 textRole: "text"
                 valueRole: "value"
-
                 model: [
-                    // Best match
                     { text: i18n("Best Match"), value: 1 },
-                    // ECMWF
                     { text: i18n("ECMWF IFS 0.25°"), value: 2 },
                     { text: i18n("ECMWF IFS HRES 9km"), value: 3 },
-                    // NOAA NCEP
                     { text: i18n("NCEP GFS Seamless"), value: 4 },
                     { text: i18n("NCEP GFS Global 0.11°/0.25°"), value: 5 },
                     { text: i18n("NCEP NBM U.S. Conus"), value: 6 },
-                    // UK Met Office
                     { text: i18n("UK Met Office Seamless"), value: 7 },
-                    { text: i18n("UK Met Office Global 10km"), value: 8 },
+                    { text: i18n("UK Met Office Global 10km"), value: 8 }
                 ]
-
                 onActivated: weatherModel.value = currentValue
                 Component.onCompleted: currentIndex = indexOfValue(weatherModel.value)
             }
 
-            // Font size selection
             Label {
+                text: i18n("Font") + ":"
                 Layout.minimumWidth: root.width / 2
-                text: i18n("Font Size") + ":"
-                horizontalAlignment: Label.AlignRight
+                horizontalAlignment: Text.AlignRight
+                verticalAlignment: Text.AlignTop
+                Layout.alignment: Qt.AlignTop
             }
-            ComboBox {
-                id: valueForSizeFont
-                textRole: "text"
-                valueRole: "value"
-                width: 32
-                model: [
-                    { text: i18n("8"), value: 8 },
-                    { text: i18n("9"), value: 9 },
-                    { text: i18n("10"), value: 10 },
-                    { text: i18n("11"), value: 11 },
-                    { text: i18n("12"), value: 12 },
-                    { text: i18n("13"), value: 13 },
-                    { text: i18n("14"), value: 14 },
-                    { text: i18n("15"), value: 15 },
-                    { text: i18n("16"), value: 16 },
-                    { text: i18n("17"), value: 17 },
-                    { text: i18n("18"), value: 18 }
-                ]
-                onActivated: fontsizeValue.value = currentValue
-                Component.onCompleted: currentIndex = indexOfValue(fontsizeValue.value)
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+
+                RowLayout {
+                    spacing: Kirigami.Units.smallSpacing
+
+                    Button {
+                        text: i18n("Choose Style…")
+                        icon.name: "settings-configure"
+                        onClicked: {
+                            fontDialog.fontChosen = Qt.font({
+                                family: fontFamilyValue.value !== ""
+                                ? fontFamilyValue.value
+                                : Qt.application.font.family,
+                                pointSize: fontsizeValue.value > 0
+                                ? fontsizeValue.value
+                                : Qt.application.font.pointSize,
+                                weight: fontWeightValue.value > 0
+                                ? fontWeightValue.value
+                                : Qt.application.font.weight
+                            })
+
+                            fontDialog.currentFont = fontDialog.fontChosen
+                            fontDialog.open()
+                        }
+                    }
+
+                    Button {
+                        text: i18n("Reset")
+                        enabled: fontFamilyValue.value !== ""
+                        || fontsizeValue.value !== Qt.application.font.pointSize
+                        || fontWeightValue.value !== Qt.application.font.weight
+
+                        onClicked: {
+                            fontFamilyValue.value = ""
+                            fontsizeValue.value = Qt.application.font.pointSize
+                            fontWeightValue.value = Qt.application.font.weight
+                            root.configurationChanged()
+                        }
+                    }
+                }
+
+                Label {
+                    text: {
+                        const fam = fontFamilyValue.value !== ""
+                        ? fontFamilyValue.value
+                        : Qt.application.font.family
+
+                        const sz = fontsizeValue.value > 0
+                        ? fontsizeValue.value
+                        : Qt.application.font.pointSize
+
+                        return i18n("%1pt %2", sz, fam)
+                    }
+
+                    textFormat: Text.PlainText
+
+                    font.family: fontFamilyValue.value !== ""
+                    ? fontFamilyValue.value
+                    : Qt.application.font.family
+
+                    font.pointSize: fontsizeValue.value > 0
+                    ? fontsizeValue.value
+                    : Qt.application.font.pointSize
+
+                    font.weight: fontWeightValue.value > 0
+                    ? fontWeightValue.value
+                    : Qt.application.font.weight
+
+                    wrapMode: Text.Wrap
+                }
+
+                Label {
+                    text: i18n("Note: size may be reduced if the panel is not thick enough.")
+                    font: Kirigami.Theme.smallFont
+                    textFormat: Text.PlainText
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                }
             }
         }
+
+        Item { Layout.fillHeight: true }
     }
 
-    // Bottom-pinned note
+    // Bottom-pinned note (OUTSIDE ColumnLayout)
     Label {
         id: bottomNote
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: Kirigami.Units.largeSpacing
+
         wrapMode: Text.WordWrap
         text: i18n("Note:\nThe default weather model 'Best Match' provides the best forecast for any given location worldwide.\nSeamless combines all models from a given provider into a seamless prediction.")
+
         font.italic: true
         horizontalAlignment: Text.AlignLeft
     }

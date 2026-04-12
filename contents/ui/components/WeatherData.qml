@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 import "../js/translator.js" as Translate
 import "../js/GetWeather.js" as GetInfoApi
 import "../js/geoCoordinates.js" as GeoCoordinates

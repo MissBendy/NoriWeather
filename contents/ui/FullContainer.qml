@@ -10,6 +10,7 @@ Item {
     property int topPanelMargin: 0
     property int exedentHight: 0
     property int spacingElements: 5
+    property string fontfamily: Plasmoid.configuration.fontFamily
 
     // Dynamic width of left panel based on weather icon and temperature text
     property int minLeftPanelWidth: 120
@@ -44,6 +45,7 @@ Item {
             color: Kirigami.Theme.textColor
             level: 1
             font.weight: Font.Medium
+            font.family: fontfamily !== "" ? fontfamily : font.family
             elide: Text.ElideRight
         }
 
@@ -72,7 +74,8 @@ Item {
                 text: wrapper.currentTemp + "°"
                 color: Kirigami.Theme.textColor
                 font.weight: Font.Normal
-                font.pixelSize: 38
+                font.pointSize: 28
+                font.family: fontfamily !== "" ? fontfamily : font.family
                 anchors.verticalCenter: parent.verticalCenter
             }
         }
@@ -93,6 +96,7 @@ Item {
                 color: Kirigami.Theme.textColor
                 level: 5
                 font.weight: Font.Medium
+                font.family: fontfamily !== "" ? fontfamily : font.family
                 wrapMode: Text.WordWrap
             }
 
@@ -103,6 +107,7 @@ Item {
                 color: Kirigami.Theme.textColor
                 level: 5
                 font.weight: Font.Medium
+                font.family: fontfamily !== "" ? fontfamily : font.family
                 elide: Text.ElideRight
             }
         }
@@ -121,6 +126,7 @@ Item {
             color: Kirigami.Theme.textColor
             level: 5
             font.underline: true
+            font.family: fontfamily !== "" ? fontfamily : font.family
             opacity: 0.4
             elide: Text.ElideRight
         }

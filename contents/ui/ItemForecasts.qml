@@ -1,6 +1,6 @@
 // QML item displaying hourly and daily weather forecasts using Kirigami components
 import QtQuick
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
 
 Item {
@@ -8,6 +8,7 @@ Item {
 
     // Stores the maximum width needed for forecast text labels
     property int widthTxt: 0
+    property string fontfamily: Plasmoid.configuration.fontFamily
 
     // Top half: hourly forecast
     Row {
@@ -42,6 +43,7 @@ Item {
                         }
                         color: Kirigami.Theme.textColor
                         level: 5
+                        font.family: fontfamily !== "" ? fontfamily : font.family
                         horizontalAlignment: Text.AlignHCenter
                         width: parent.width
                     }
@@ -62,6 +64,7 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         width: parent.width
                         level: 5
+                        font.family: fontfamily !== "" ? fontfamily : font.family
                     }
                 }
             }
@@ -92,6 +95,7 @@ Item {
                     width: parent.width * 0.4
                     color: Kirigami.Theme.textColor
                     level: 5
+                    font.family: fontfamily !== "" ? fontfamily : font.family
                 }
 
                 // Icon - middle column, explicitly centered
@@ -117,6 +121,7 @@ Item {
                         text: model.maxTemp + "°"
                         level: 5
                         horizontalAlignment: Text.AlignRight
+                        font.family: fontfamily !== "" ? fontfamily : font.family
                         Layout.preferredWidth: Kirigami.Units.gridUnit * 1
                     }
 
@@ -124,6 +129,7 @@ Item {
                         text: "/"
                         level: 5
                         horizontalAlignment: Text.AlignCenter
+                        font.family: fontfamily !== "" ? fontfamily : font.family
                         Layout.preferredWidth: implicitWidth
                     }
 
@@ -132,6 +138,7 @@ Item {
                         text: model.minTemp + "°"
                         level: 5
                         horizontalAlignment: Text.AlignLeft
+                        font.family: fontfamily !== "" ? fontfamily : font.family
                         Layout.preferredWidth: Kirigami.Units.gridUnit * 1
                     }
                 }

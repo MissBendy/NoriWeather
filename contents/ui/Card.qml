@@ -1,6 +1,6 @@
 // QML item creating a composite SVG mask with color fill and optional graphical effects
 import QtQuick
-import org.kde.ksvg 1.0 as KSvg
+import org.kde.ksvg as KSvg
 import Qt5Compat.GraphicalEffects
 
 Item {
