@@ -10,7 +10,7 @@ Item {
     property int topPanelMargin: 0
     property int exedentHight: 0
     property int spacingElements: 5
-    property string fontfamily: Plasmoid.configuration.fontFamily
+    property string fontfamily: plasmoid.configuration.fontFamily
 
     // Dynamic width of left panel based on weather icon and temperature text
     property int minLeftPanelWidth: 120
@@ -74,7 +74,7 @@ Item {
                 text: wrapper.currentTemp + "°"
                 color: Kirigami.Theme.textColor
                 font.weight: Font.Normal
-                font.pointSize: 28
+                font.pointSize: 30
                 font.family: fontfamily !== "" ? fontfamily : font.family
                 anchors.verticalCenter: parent.verticalCenter
             }

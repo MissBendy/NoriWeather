@@ -142,13 +142,13 @@ Item {
             return calculatePosition(x, y);
         }
 
-        FocusScope {
+        mainItem: FocusScope {
             id: rootItem
             // Set minimum and maximum dimensions for the popup
-            Layout.minimumWidth:  Kirigami.Units.gridUnit * 20
-            Layout.maximumWidth:  Kirigami.Units.gridUnit * 20
-            Layout.minimumHeight: Kirigami.Units.gridUnit * 10.25
-            Layout.maximumHeight: Kirigami.Units.gridUnit * 10.25
+            implicitWidth:  Kirigami.Units.gridUnit * 20
+            implicitHeight: Kirigami.Units.gridUnit * 10.25
+            width:  implicitWidth
+            height: implicitHeight
             focus: true
 
             FullContainer {

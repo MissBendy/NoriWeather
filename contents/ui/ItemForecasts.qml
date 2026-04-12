@@ -8,7 +8,7 @@ Item {
 
     // Stores the maximum width needed for forecast text labels
     property int widthTxt: 0
-    property string fontfamily: Plasmoid.configuration.fontFamily
+    property string fontfamily: plasmoid.configuration.fontFamily
 
     // Top half: hourly forecast
     Row {
