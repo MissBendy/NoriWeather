@@ -29,7 +29,7 @@
       <default>1</default>
     </entry>
     <entry name="sizeFontConfig" type="Int">
-      <default></default>
+      <default>10</default>
     </entry>
     <entry name="fontWeight" type="Int">
       <default></default>
