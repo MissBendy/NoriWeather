@@ -13,3 +13,6 @@ Provides hourly and daily weather forecasts with:
 - Sunrise & sunset times fetched via the [Sunrise-Sunset API](https://sunrise-sunset.org/)
 - Automatic coordinate detection via [IP-API](https://ip-api.com/)
 - Location info fetched via [Nominatim](https://nominatim.openstreetmap.org/)
+
+<img width="506" height="284" alt="pasted file" src="https://github.com/user-attachments/assets/cda81ee0-1cf8-4320-8562-a70b037b873b" />
+
