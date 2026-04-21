@@ -1,96 +1,78 @@
-// QML item creating a composite SVG mask with color fill and optional graphical effects
+// Left panel background using a rounded Rectangle to match the popup chrome
 import QtQuick
 import org.kde.ksvg as KSvg
-import Qt5Compat.GraphicalEffects
+import org.kde.plasma.plasmoid
+import org.kde.plasma.core as PlasmaCore
 
 Item {
-    // Left margin based on top-left SVG width
-    property int marginLeft: maskSvg2.marg
-    // Base color used for masked rectangles
+    property int marginLeft: 0
     property color leftColor: "cyan"
 
-    // Grid to arrange the SVG components of the background
-    Grid {
-        id: maskSvg2
-        width: parent.width
-        height: parent.height
-        columns: 2
-        property var marg: topleft2.implicitWidth
-
-        // Top-left corner of the background
-        KSvg.SvgItem {
-            id: topleft2
-            imagePath: "dialogs/background"
-            elementId: "topleft"
-        }
-
-        // Top edge spanning the remaining width
-        KSvg.SvgItem {
-            id: top2
-            imagePath: "dialogs/background"
-            elementId: "top"
-            width: parent.width - topleft2.implicitWidth
-        }
-
-        // Left edge spanning the remaining height
-        KSvg.SvgItem {
-            id: left2
-            imagePath: "dialogs/background"
-            elementId: "left"
-            height: parent.height - topleft2.implicitHeight * 2
-        }
-
-        // Center area between edges
-        KSvg.SvgItem {
-            imagePath: "dialogs/background"
-            elementId: "center"
-            height: parent.height - topleft2.implicitHeight * 2
-            width: top2.width
-        }
-
-        // Bottom-left corner
-        KSvg.SvgItem {
-            id: bottomleft2
-            imagePath: "dialogs/background"
-            elementId: "bottomleft"
-        }
-
-        // Bottom edge spanning remaining width
-        KSvg.SvgItem {
-            id: bottom2
-            imagePath: "dialogs/background"
-            elementId: "bottom"
-            width: parent.width - bottomleft2.implicitWidth
-        }
+    // Derive corner radius from the actual dialogs/background SVG so it always
+    // matches the popup chrome — falls back to 6px if margins are unavailable.
+    readonly property int cornerRadius: {
+        var m = backgroundSvg.margins
+        if (m && m.left > 0) return m.left
+        return 6
     }
 
-    // Rectangle filled with leftColor, masked by the composed SVG grid
+    // Which panel edge are we sitting on?
+    readonly property bool onBottomEdge: plasmoid.location === PlasmaCore.Types.BottomEdge
+    readonly property bool onTopEdge:    plasmoid.location === PlasmaCore.Types.TopEdge
+
+    // Hidden SVG used only to read the theme's corner radius
+    KSvg.FrameSvgItem {
+        id: backgroundSvg
+        visible: false
+        imagePath: "dialogs/background"
+    }
+
+    clip: true
+
     Rectangle {
+        anchors.fill: parent
         color: leftColor
-        width: maskSvg2.width
-        height: maskSvg2.height
-        layer.enabled: true
-        layer.effect: OpacityMask {
-            maskSource: maskSvg2
+        radius: cornerRadius
+
+        // Always square off the right-side corners (left panel never has right-side rounding)
+        Rectangle {
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            width: cornerRadius
+            color: parent.color
+        }
+
+        // On a bottom panel: square off the bottom-left corner so it sits flush
+        // against the panel edge. The top-left corner stays rounded.
+        Rectangle {
+            visible: onBottomEdge
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: cornerRadius
+            color: parent.color
+        }
+
+        // On a top panel: square off the top-left corner so it sits flush
+        // against the panel edge. The bottom-left corner stays rounded.
+        Rectangle {
+            visible: onTopEdge
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            height: cornerRadius
+            color: parent.color
         }
     }
 
-    // Duplicate rectangle with the same mask (can be used for layered effects)
-    Rectangle {
-        color: leftColor
-        width: maskSvg2.width
-        height: maskSvg2.height
-        layer.enabled: true
-        layer.effect: OpacityMask {
-            maskSource: maskSvg2
-        }
-    }
-
-    // Vertical line SVG aligned to the right of the grid
+    // Vertical divider line on the right edge
     KSvg.SvgItem {
-        anchors.right: maskSvg2.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
         imagePath: "widgets/line"
         elementId: "vertical-line"
-        height: parent.height
+        width: 1
     }
 }

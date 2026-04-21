@@ -9,7 +9,6 @@ import org.kde.ksvg as KSvg
 
 PlasmoidItem {
     id: wrapper
-    anchors.fill: parent
 
     // Weather data component providing current and forecast info
     Components.WeatherData {
@@ -197,11 +196,12 @@ PlasmoidItem {
 
     // Representations for the plasmoid
     preferredRepresentation: compactRepresentation
-    compactRepresentation: compactRepresentation
-    fullRepresentation: compactRepresentation
 
-    Component {
-        id: compactRepresentation
+    compactRepresentation: Component {
         CompactRepresentation {}
+    }
+
+    fullRepresentation: Component {
+        FullRepresentation {}
     }
 }

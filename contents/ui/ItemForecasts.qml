@@ -13,8 +13,12 @@ Item {
     // Top half: hourly forecast
     Row {
         id: hourlyForecast
-        width: parent.width
-        height: parent.height / 2
+        width: parent.width - 10
+        height: 80
+        anchors.top: parent.top
+        anchors.topMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
 
         // Repeat for each hourly forecast entry
         Repeater {
@@ -73,9 +77,13 @@ Item {
 
     // Bottom half: daily forecast
     Column {
-        width: parent.width
+        width: parent.width - 10
         anchors.top: hourlyForecast.bottom
-        anchors.topMargin: -9
+        anchors.topMargin: 4
+        anchors.left: parent.left
+        anchors.leftMargin: 5
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
         spacing: 2
 
         // Repeat for each daily forecast entry

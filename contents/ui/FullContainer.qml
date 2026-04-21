@@ -6,9 +6,6 @@ import QtQuick.Controls as Controls
 
 Item {
     // Margins and spacing for layout adjustments
-    property int leftPanelMargin: 0
-    property int topPanelMargin: 0
-    property int exedentHight: 0
     property int spacingElements: 5
     property string fontfamily: plasmoid.configuration.fontFamily
 
@@ -25,17 +22,18 @@ Item {
     LeftPanel {
         id: leftPanel
         anchors.left: parent.left
-        anchors.leftMargin: -leftPanelMargin
         anchors.top: parent.top
-        anchors.topMargin: -topPanelMargin
         width: parent.widthOfLeftPanel
-        height: parent.height + exedentHight
+        height: parent.height
     }
 
     // Main content container inside left panel
     Item {
         width: leftPanel.width
         anchors.top: parent.top
+        anchors.topMargin: 5
+        anchors.left: parent.left
+        anchors.leftMargin: 5
 
         // City name heading
         Kirigami.Heading {
@@ -118,6 +116,9 @@ Item {
         width: link.implicitWidth
         height: link.implicitHeight
         anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
+        anchors.leftMargin: 5
+        anchors.left: parent.left
 
         Kirigami.Heading {
             id: link

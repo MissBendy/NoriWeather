@@ -6,15 +6,16 @@ import org.kde.plasma.core as PlasmaCore
 import org.kde.plasma.plasmoid
 import org.kde.plasma.components as PlasmaComponents3
 
-Item {
+MouseArea {
     id: iconAndTemp
-    anchors.fill: parent
     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
+    implicitWidth: widthReal
+    implicitHeight: heightReal
     Layout.minimumWidth: widthReal
+    Layout.preferredWidth: widthReal
     Layout.minimumHeight: heightReal
-
-    property QtObject dashWindow: null
+    Layout.preferredHeight: heightReal
 
     readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
 
@@ -28,24 +29,22 @@ Item {
 
     property bool activeweatherShortText: !isVertical
 
-    property int heightH: wrapper.height
     property var widthWidget: temperatureRow.implicitWidth +
     (textweather ? wrapper_weathertext.implicitWidth : 0)
 
-    property var widthReal: isVertical ? wrapper.width : initial.implicitWidth
+    property var widthReal: isVertical ? Kirigami.Units.iconSizes.medium : initial.implicitWidth
     property var hVerti: wrapper_vertical.implicitHeight
-    property var heightReal: isVertical ? hVerti : wrapper.height
+    property var heightReal: isVertical ? hVerti : initial.implicitHeight
 
     property int fontWeightResolved: fontWeightValue > 0
     ? fontWeightValue
     : Qt.application.font.weight
 
-    MouseArea {
-        id: compactMouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        onClicked: dashWindow.visible = !dashWindow.visible
-    }
+    property bool wasExpanded: false
+    hoverEnabled: true
+    acceptedButtons: Qt.LeftButton
+    onPressed: wasExpanded = wrapper.expanded
+    onClicked: wrapper.expanded = !wasExpanded
 
     RowLayout {
         id: initial
@@ -159,12 +158,4 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        dashWindow = Qt.createQmlObject("Representation {}", wrapper)
-        plasmoid.activated.connect(function() {
-            dashWindow.plasmoidWidV = widthReal
-            dashWindow.plasmoidWidH = heightReal
-            dashWindow.visible = !dashWindow.visible
-        })
-    }
 }
