@@ -10,144 +10,157 @@ Item {
     property int widthTxt: 0
     property string fontfamily: plasmoid.configuration.fontFamily
 
-    // Top half: hourly forecast
-    Row {
+    // Top half: hourly forecast — 14px literal margins on left and right
+    Item {
         id: hourlyForecast
-        width: parent.width - 10
         height: 80
         anchors.top: parent.top
         anchors.topMargin: 5
         anchors.left: parent.left
         anchors.leftMargin: 5
+        anchors.right: parent.right
+        anchors.rightMargin: 5
 
-        // Repeat for each hourly forecast entry
-        Repeater {
-            model: forecastHours
-            delegate: Item {
-                width: parent.width / 5
-                height: parent.height
+        Row {
+            anchors.fill: parent
 
-                Column {
-                    width: parent.width
+            Repeater {
+                model: forecastHours
+                delegate: Item {
+                    width: parent.width / 5
                     height: parent.height
-                    spacing: Kirigami.Units.iconSizes.small / 3
-                    anchors.horizontalCenter: parent.horizontalCenter
 
-                    // Hour label (12h or 24h format)
-                    Kirigami.Heading {
-                        text: {
-                            if (wrapper.timeFormat === 24) {
-                                return model.hours;
-                            } else {
-                                var hour12 = model.hours % 12;
-                                if (hour12 === 0) hour12 = 12;
-                                var suffix = (model.hours >= 12) ? "pm" : "am";
-                                return hour12 + suffix;
+                    Column {
+                        width: parent.width
+                        anchors.centerIn: parent
+                        spacing: Kirigami.Units.iconSizes.small / 3
+
+                        // Hour label (12h or 24h format)
+                        Kirigami.Heading {
+                            text: {
+                                if (wrapper.timeFormat === 24) {
+                                    return model.hours;
+                                } else {
+                                    var hour12 = model.hours % 12;
+                                    if (hour12 === 0) hour12 = 12;
+                                    var suffix = (model.hours >= 12) ? "pm" : "am";
+                                    return hour12 + suffix;
+                                }
                             }
+                            color: Kirigami.Theme.textColor
+                            level: 5
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            horizontalAlignment: Text.AlignHCenter
+                            width: parent.width
                         }
-                        color: Kirigami.Theme.textColor
-                        level: 5
-                        font.family: fontfamily !== "" ? fontfamily : font.family
-                        horizontalAlignment: Text.AlignHCenter
-                        width: parent.width
-                    }
 
-                    // Weather icon for the hour
-                    Kirigami.Icon {
-                        source: model.icon
-                        width: Kirigami.Units.iconSizes.medium
-                        height: width
-                        roundToIconSize: false
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
+                        // Weather icon for the hour
+                        Kirigami.Icon {
+                            source: model.icon
+                            width: Kirigami.Units.iconSizes.medium
+                            height: width
+                            roundToIconSize: false
+                            anchors.horizontalCenter: parent.horizontalCenter
+                        }
 
-                    // Temperature label for the hour
-                    Kirigami.Heading {
-                        text: " " + model.temp + "°"
-                        color: Kirigami.Theme.textColor
-                        horizontalAlignment: Text.AlignHCenter
-                        width: parent.width
-                        level: 5
-                        font.family: fontfamily !== "" ? fontfamily : font.family
+                        // Temperature label for the hour
+                        Kirigami.Heading {
+                            text: " " + model.temp + "°"
+                            color: Kirigami.Theme.textColor
+                            horizontalAlignment: Text.AlignHCenter
+                            level: 5
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            width: parent.width
+                        }
                     }
                 }
             }
         }
     }
 
-    // Bottom half: daily forecast
-    Column {
-        width: parent.width - 10
+    // Bottom half: daily forecast — 10px literal margins on left and right
+    Item {
+        id: dailyForecast
         anchors.top: hourlyForecast.bottom
-        anchors.topMargin: 4
+        anchors.topMargin: 5
         anchors.left: parent.left
-        anchors.leftMargin: 5
+        anchors.leftMargin: 10
+        anchors.right: parent.right
+        anchors.rightMargin: 10
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
-        spacing: 2
 
-        // Repeat for each daily forecast entry
-        Repeater {
-            model: forecastFullModel
-            delegate: Item {
-                width: parent.width
-                height: Kirigami.Units.iconSizes.medium
+        Column {
+            anchors.fill: parent
+            spacing: 2
 
-                // Day label - left column
-                Kirigami.Heading {
-                    id: day
-                    text: model.date
-                    anchors.left: parent.left
-                    anchors.leftMargin: 4
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: parent.width * 0.4
-                    color: Kirigami.Theme.textColor
-                    level: 5
-                    font.family: fontfamily !== "" ? fontfamily : font.family
-                }
+            Repeater {
+                model: forecastFullModel
+                delegate: Item {
+                    width: parent.width
+                    height: Kirigami.Units.iconSizes.medium
 
-                // Icon - middle column, explicitly centered
-                Kirigami.Icon {
-                    source: model.icon
-                    width: Kirigami.Units.iconSizes.medium
-                    height: width
-                    roundToIconSize: false
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                // Temperature - right column
-                RowLayout {
-                    id: tempRow
-                    anchors.right: parent.right
-                    anchors.rightMargin: parent.width * 0.04
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 4
-
+                    // Day label — anchored to left edge of delegate (margins already applied by parent)
                     Kirigami.Heading {
-                        id: maxTempLabel
-                        text: model.maxTemp + "°"
+                        id: day
+                        text: model.date
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width * 0.4
+                        color: Kirigami.Theme.textColor
                         level: 5
-                        horizontalAlignment: Text.AlignRight
                         font.family: fontfamily !== "" ? fontfamily : font.family
-                        Layout.preferredWidth: Kirigami.Units.gridUnit * 1
                     }
 
-                    Kirigami.Heading {
-                        text: "/"
-                        level: 5
-                        horizontalAlignment: Text.AlignCenter
-                        font.family: fontfamily !== "" ? fontfamily : font.family
-                        Layout.preferredWidth: implicitWidth
+                    // Icon — centered in the delegate
+                    Kirigami.Icon {
+                        source: model.icon
+                        width: Kirigami.Units.iconSizes.medium
+                        height: width
+                        roundToIconSize: false
+                        anchors.centerIn: parent
                     }
 
-                    Kirigami.Heading {
-                        id: minTempLabel
-                        text: model.minTemp + "°"
-                        level: 5
-                        horizontalAlignment: Text.AlignLeft
-                        font.family: fontfamily !== "" ? fontfamily : font.family
-                        Layout.preferredWidth: Kirigami.Units.gridUnit * 1
+                    // Temperature — slash is the anchor reference, max to its left, min to its right
+                    Item {
+                        id: tempRow
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: slash.implicitWidth + maxTemp.implicitWidth + minTemp.implicitWidth + 8
+                        height: slash.implicitHeight
+
+                        Kirigami.Heading {
+                            id: maxTemp
+                            text: model.maxTemp + "°"
+                            level: 5
+                            horizontalAlignment: Text.AlignRight
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            anchors.right: slash.left
+                            anchors.rightMargin: 4
+                            anchors.baseline: slash.baseline
+                        }
+
+                        Kirigami.Heading {
+                            id: slash
+                            text: "/"
+                            level: 5
+                            horizontalAlignment: Text.AlignHCenter
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            anchors.right: parent.right
+                            anchors.rightMargin: minTemp.implicitWidth + 4
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Kirigami.Heading {
+                            id: minTemp
+                            text: model.minTemp + "°"
+                            level: 5
+                            horizontalAlignment: Text.AlignLeft
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            anchors.left: slash.right
+                            anchors.leftMargin: 4
+                            anchors.baseline: slash.baseline
+                        }
                     }
                 }
             }
