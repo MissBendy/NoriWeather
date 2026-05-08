@@ -21,19 +21,21 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 5
 
-        Row {
+        Item {
             anchors.fill: parent
 
             Repeater {
                 model: forecastHours
                 delegate: Item {
-                    width: parent.width / 5
+                    x: Math.round(index * (parent.width / 5))
+                    width: Math.round((index + 1) * (parent.width / 5)) - x
                     height: parent.height
 
                     Column {
                         width: parent.width
-                        anchors.centerIn: parent
-                        spacing: Kirigami.Units.iconSizes.small / 3
+                        y: Math.round((parent.height - height) / 2)
+                        x: 0
+                        spacing: Math.round(Kirigami.Units.iconSizes.small / 3)
 
                         // Hour label (12h or 24h format)
                         Kirigami.Heading {
