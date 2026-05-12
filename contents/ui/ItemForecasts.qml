@@ -123,34 +123,35 @@ Item {
                         anchors.centerIn: parent
                     }
 
-                    // Temperature — slash is the anchor reference, max to its left, min to its right
+                    // Temperature — each side uses a hidden sizer matching its digit count
+                    // so the slash stays fixed and no monospacing is needed
                     Item {
                         id: tempRow
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        width: slash.implicitWidth + maxTemp.implicitWidth + minTemp.implicitWidth + 8
+                        width: maxTempSizer.implicitWidth + slash.implicitWidth + minTempSizer.implicitWidth
                         height: slash.implicitHeight
 
                         Kirigami.Heading {
-                            id: maxTemp
-                            text: model.maxTemp + "°"
+                            id: maxTempSizer
+                            text: model.maxTemp < 0 ? (model.maxTemp > -10 ? "-9°" : "-99°")
+                                : model.maxTemp < 10 ? "9°"
+                                : model.maxTemp < 100 ? "99°"
+                                : "999°"
                             level: 5
-                            horizontalAlignment: Text.AlignRight
                             font.family: fontfamily !== "" ? fontfamily : font.family
-                            anchors.right: slash.left
-                            anchors.rightMargin: 4
-                            anchors.baseline: slash.baseline
+                            visible: false
                         }
 
                         Kirigami.Heading {
-                            id: slash
-                            text: "/"
+                            id: minTempSizer
+                            text: model.minTemp < 0 ? (model.minTemp > -10 ? "-9°" : "-99°")
+                                : model.minTemp < 10 ? "9°"
+                                : model.minTemp < 100 ? "99°"
+                                : "999°"
                             level: 5
-                            horizontalAlignment: Text.AlignHCenter
                             font.family: fontfamily !== "" ? fontfamily : font.family
-                            anchors.right: parent.right
-                            anchors.rightMargin: minTemp.implicitWidth + 4
-                            anchors.verticalCenter: parent.verticalCenter
+                            visible: false
                         }
 
                         Kirigami.Heading {
@@ -159,9 +160,30 @@ Item {
                             level: 5
                             horizontalAlignment: Text.AlignLeft
                             font.family: fontfamily !== "" ? fontfamily : font.family
-                            anchors.left: slash.right
-                            anchors.leftMargin: 4
-                            anchors.baseline: slash.baseline
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: minTempSizer.implicitWidth
+                        }
+
+                        Kirigami.Heading {
+                            id: slash
+                            text: " / "
+                            level: 5
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            anchors.right: minTemp.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: implicitWidth
+                        }
+
+                        Kirigami.Heading {
+                            id: maxTemp
+                            text: model.maxTemp + "°"
+                            level: 5
+                            horizontalAlignment: Text.AlignRight
+                            font.family: fontfamily !== "" ? fontfamily : font.family
+                            anchors.right: slash.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: maxTempSizer.implicitWidth
                         }
                     }
                 }
