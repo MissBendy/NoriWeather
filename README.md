@@ -14,5 +14,4 @@ Provides hourly and daily weather forecasts with:
 - Automatic coordinate detection via [IP-API](https://ip-api.com/)
 - Location info fetched via [Nominatim](https://nominatim.openstreetmap.org/)
 
-<img width="506" height="284" alt="pasted file" src="https://github.com/user-attachments/assets/cda81ee0-1cf8-4320-8562-a70b037b873b" />
-
+<img width="521" height="278" alt="image" src="https://github.com/user-attachments/assets/6b6020b0-8722-4852-9e06-a487a24cfc00" />
